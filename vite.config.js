@@ -5,8 +5,9 @@ export default defineConfig({
   plugins: [jsconfigPaths()],
   esbuild: {
     jsx: 'transform',
-    jsxInject: `import { jsx } from '@lib/jsx/jsx-runtime'`,
+    jsxInject: `import { jsx, Fragment } from '@lib/jsx/jsx-runtime'`,
     jsxFactory: 'jsx',
+    jsxFragment: 'Fragment',
   },
   resolve: {
     alias: {

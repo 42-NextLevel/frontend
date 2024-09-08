@@ -1,3 +1,5 @@
+import { convertAttribute, isEventAttribute } from './util.js';
+
 export const createElement = (node) => {
   // null이나 undefined의 경우 fragment 생성
   if (node === null || node === undefined) {
@@ -16,14 +18,11 @@ export const createElement = (node) => {
   Object.entries(node.props || {})
     .filter(([attr, value]) => value)
     .forEach(([attr, value]) => {
-      if (attr === 'onClick') {
-        element.addEventListener('click', value);
-        return;
+      if (isEventAttribute(attr, value)) {
+        const event = attr.slice(2).toLowerCase();
+        return element.addEventListener(event, value);
       }
-      if (attr === 'className') {
-        attr = 'class';
-      }
-      element.setAttribute(attr, value);
+      element.setAttribute(convertAttribute(attr), value);
     });
 
   // 자식노드가 있는 경우 재귀호출

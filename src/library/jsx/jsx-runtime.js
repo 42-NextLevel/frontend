@@ -10,3 +10,5 @@ export const jsx = (type, props, ...children) => {
 };
 
 export const jsxs = jsx;
+
+export const Fragment = ({ children }) => children;
