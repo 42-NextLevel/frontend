@@ -1,5 +1,6 @@
-@import "bootstrap/scss/bootstrap";
-@import "fonts";
+@import 'variables';
+@import 'fonts';
+@import 'bootstrap/scss/bootstrap';
 
 * {
   font-family: 'Paperlogy', sans-serif;
