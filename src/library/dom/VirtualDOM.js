@@ -1,8 +1,16 @@
-import { createElement } from './createElement.js';
+import { updateElements } from './updateElement.js';
 
 class VirtualDOM {
   constructor() {
     this.root = null;
+    this.VDOM = {
+      instance: [],
+      function: null,
+    };
+    this.states = {
+      store: [],
+      count: 0,
+    };
   }
 
   createRoot(root) {
@@ -10,9 +18,38 @@ class VirtualDOM {
     return this;
   }
 
+  createDOM() {
+    const newVDOM = this.VDOM.function();
+    this.states.count = 0;
+    return newVDOM.length ? newVDOM : [newVDOM];
+  }
+
   render(component) {
-    this.root.innerHTML = '';
-    this.root.appendChild(createElement(component));
+    if (component) {
+      this.VDOM.function = component;
+    }
+    const newVDOM = this.createDOM();
+    updateElements(this.root, this.VDOM.instance, newVDOM);
+    this.VDOM.instance = newVDOM;
+  }
+
+  useState(initial) {
+    const index = this.states.count++;
+    if (this.states.store[index] === undefined) {
+      this.states.store[index] = initial;
+    }
+    const state = this.states.store[index];
+
+    const setState = (newState) => {
+      if (typeof newState === 'function') {
+        this.states.store[index] = newState(this.states.store[index]);
+      } else {
+        this.states.store[index] = newState;
+      }
+      this.render();
+    };
+
+    return [state, setState];
   }
 }
 
