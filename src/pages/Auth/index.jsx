@@ -1,9 +1,17 @@
+import { useNavigate, useSearchParams } from '@/library/router/hooks.js';
+import { useEffect } from '@/library/hooks.js';
+
 const Auth = () => {
-  return (
-    <div>
-      <h1>Auth Page</h1>
-    </div>
-  );
+  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (searchParams.get('error')) {
+      navigate('/', { replace: true });
+    }
+  }, []);
+
+  return null;
 };
 
 export default Auth;
