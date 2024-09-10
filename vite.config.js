@@ -15,4 +15,7 @@ export default defineConfig({
       '@lib': '/src/library',
     },
   },
+  server: {
+    port: 3100,
+  },
 });
