@@ -28,7 +28,7 @@ class VirtualDOM {
     const newVDOM = this.VDOM.function();
     this.states.count = 0;
     this.effects.count = 0;
-    return newVDOM.length ? newVDOM : [newVDOM];
+    return Array.isArray(newVDOM) ? newVDOM : [newVDOM];
   }
 
   render(component) {
