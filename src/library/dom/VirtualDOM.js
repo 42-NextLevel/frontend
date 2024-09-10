@@ -27,6 +27,7 @@ class VirtualDOM {
   render(component) {
     if (component) {
       this.VDOM.function = component;
+      this.states.store = [];
     }
     const newVDOM = this.createDOM();
     updateElements(this.root, this.VDOM.instance, newVDOM);
