@@ -1,5 +1,8 @@
 import '@/styles/global.scss';
 import { virtualDOM } from '@/library/dom/VirtualDOM.js';
-import Home from '@/pages/Home';
+import { RouterProvider } from '@/library/router/RouterProvider.js';
+import { routes } from './routes.js';
 
-virtualDOM.createRoot(document.getElementById('root')).render(Home);
+virtualDOM
+  .createRoot(document.getElementById('root'))
+  .render(<RouterProvider routes={routes} />);
