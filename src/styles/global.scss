@@ -1,10 +1,31 @@
+// 1. Include functions first (so you can manipulate colors, SVGs, calc, etc)
+@import 'bootstrap/scss/functions';
+
+// 2. Include any default variable overrides here
 @import 'variables';
-@import 'bootstrap/scss/bootstrap';
+
+// 3. Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+
+// 4. Include any default map overrides here
+$theme-colors: (
+        'primary': $indigo-400,
+);
+
+// 5. Include remainder of required parts
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/root';
+
+// 6. Add additional custom code here
 @import 'fonts';
-@import 'custom';
-@import 'profile';
-@import 'button';
 
 * {
   font-family: 'Paperlogy', sans-serif;
 }
+
+@import 'custom';
+@import 'profile';
+
+@import 'bootstrap/scss/bootstrap';

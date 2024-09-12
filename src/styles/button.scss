@@ -1,9 +1,0 @@
-@import 'bootstrap/scss/functions';
-@import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins';
-
-.btn-indigo {
-  @include button-variant($indigo-400, $indigo-400);
-  @include button-size(0.75rem, 3rem, 1rem, $btn-border-radius-lg);
-  font-weight: 500;
-}
