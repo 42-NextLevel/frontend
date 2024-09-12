@@ -1,0 +1,8 @@
+@import 'variables';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/mixins';
+
+@mixin border-variant($color) {
+  border: solid 3px $color;
+  border-radius: $border-radius;
+}

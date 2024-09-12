@@ -1,9 +1,9 @@
-@import 'custom';
+@import 'mixins';
 
 .profile {
   width: 200px;
   height: 200px;
-  @include card-border-variant($indigo-400);
+  @include border-variant($indigo-400);
 
   img {
     width: 112px;
