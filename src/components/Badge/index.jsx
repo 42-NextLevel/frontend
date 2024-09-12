@@ -1,19 +1,14 @@
 const Badge = ({ roomType }) => {
-  const cardClass =
-    'card border-3 p-1 badge_class ' +
-    (roomType ? 'border-success' : 'border-primary');
+  const individual = 0;
+  const tournament = 1;
 
-  const textClass =
-    'card-text fw-semibold text-center ' +
-    (roomType ? 'text-success' : 'text-primary');
+  if (roomType === individual)
+    return <div className='badge-lg green'>개인전</div>;
 
-  const text = roomType ? '토너먼트' : '개인전';
+  if (roomType === tournament)
+    return <div className='badge-lg blue'>토너먼트</div>;
 
-  return (
-    <div className={cardClass}>
-      <div className={textClass}>{text}</div>
-    </div>
-  );
+  return <div>잘못된 타입</div>;
 };
 
 export default Badge;
