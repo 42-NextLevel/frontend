@@ -1,11 +1,11 @@
-import Button from '@/components/Button';
+import LoginButton from './components/LoginButton';
 
-const Index = () => {
+const Home = () => {
   return (
     <div>
-      <Button>42 계정으로 로그인</Button>
+      <LoginButton>42 계정으로 로그인</LoginButton>
     </div>
   );
 };
 
-export default Index;
+export default Home;
