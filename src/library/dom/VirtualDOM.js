@@ -11,6 +11,12 @@ class VirtualDOM {
       store: [],
       count: 0,
     };
+    this.effects = {
+      store: [],
+      count: 0,
+      deps: [],
+      cleanUps: [],
+    };
   }
 
   createRoot(root) {
@@ -21,17 +27,20 @@ class VirtualDOM {
   createDOM() {
     const newVDOM = this.VDOM.function();
     this.states.count = 0;
-    return newVDOM.length ? newVDOM : [newVDOM];
+    this.effects.count = 0;
+    return Array.isArray(newVDOM) ? newVDOM : [newVDOM];
   }
 
   render(component) {
     if (component) {
       this.VDOM.function = component;
       this.states.store = [];
+      this.cleanUpEffects();
     }
     const newVDOM = this.createDOM();
     updateElements(this.root, this.VDOM.instance, newVDOM);
     this.VDOM.instance = newVDOM;
+    this.runEffects();
   }
 
   useState(initial) {
@@ -52,6 +61,37 @@ class VirtualDOM {
 
     return [state, setState];
   }
+
+  useEffect(callback, deps) {
+    const index = this.effects.count++;
+    this.effects.store[index] = () => {
+      if (!deps || isDepsChanged(deps, this.effects.deps[index])) {
+        const cleanUp = callback();
+        if (typeof cleanUp === 'function') {
+          this.effects.cleanUps.push(cleanUp);
+        }
+        this.effects.deps[index] = deps;
+      }
+    };
+  }
+
+  runEffects() {
+    this.effects.cleanUps = [];
+    this.effects.store.forEach((effect) => effect());
+  }
+
+  cleanUpEffects() {
+    this.effects.store = [];
+    this.effects.cleanUps.forEach((cleanUp) => cleanUp());
+    this.effects.cleanUps = [];
+  }
 }
 
 export const virtualDOM = new VirtualDOM();
+
+const isDepsChanged = (newDeps, prevDeps) => {
+  if (!prevDeps || newDeps.length !== prevDeps.length) {
+    return true;
+  }
+  return newDeps.some((newDep, i) => newDep !== prevDeps[i]);
+};

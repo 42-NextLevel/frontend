@@ -1,0 +1,12 @@
+@import 'mixins';
+
+.profile {
+  width: 200px;
+  height: 200px;
+  @include border-variant($indigo-400);
+
+  img {
+    width: 112px;
+    height: 112px;
+  }
+}
