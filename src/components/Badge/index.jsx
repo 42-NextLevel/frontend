@@ -8,7 +8,7 @@ const Badge = ({ roomType }) => {
   if (roomType === tournament)
     return <div className='badge-lg blue'>토너먼트</div>;
 
-  return <div>잘못된 타입</div>;
+  return null;
 };
 
 export default Badge;
