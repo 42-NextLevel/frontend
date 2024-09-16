@@ -15,12 +15,12 @@
   padding: 4px 0px;
 
   &.green {
-    background: $success;
+    background: $green-500;
     color: white;
   }
 
   &.blue {
-    background: $primary;
+    background: $blue-500;
     color: white;
   }
 }
