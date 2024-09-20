@@ -24,7 +24,7 @@ export const createElement = (node) => {
     });
 
   // 자식노드가 있는 경우 재귀호출
-  node.children.forEach((child) => element.appendChild(createElement(child)));
+  node.children?.forEach((child) => element.appendChild(createElement(child)));
 
   return element;
 };
