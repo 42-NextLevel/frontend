@@ -1,5 +1,6 @@
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
+import AuthMail from '@/pages/AuthMail';
 
 export const routes = [
   {
@@ -8,6 +9,15 @@ export const routes = [
   },
   {
     path: '/auth',
-    element: Auth,
+    children: [
+      {
+        index: true,
+        element: Auth,
+      },
+      {
+        path: 'mail',
+        element: AuthMail,
+      },
+    ],
   },
 ];
