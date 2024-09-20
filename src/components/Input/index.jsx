@@ -2,7 +2,7 @@ const Input = ({ placeholder, onChange, label }) => {
   return (
     <>
       {label && (
-        <label className='form-label' htmlFor={label}>
+        <label className='form-label mt-3' htmlFor={label}>
           {label}
         </label>
       )}
