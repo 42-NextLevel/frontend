@@ -28,7 +28,6 @@ class Router {
   }
 
   matchRoute($routes, parentPath = '/') {
-    console.log($routes, parentPath);
     const routes = $routes.map((route) => ({
       ...route,
       absolutePath: getAbsolutePath(route, parentPath),
