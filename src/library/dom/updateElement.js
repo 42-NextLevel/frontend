@@ -36,7 +36,7 @@ export const updateElement = (parent, currentVNode, newVNode, index = 0) => {
   updateElements(node, currentVNode.children, newVNode.children);
 };
 
-const deleteElement = (parent, currentVNodes, index) => {
+const deleteElement = (parent, currentVNode, index) => {
   if (!isExist(currentVNode)) {
     return;
   }
