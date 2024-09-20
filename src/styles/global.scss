@@ -22,6 +22,11 @@ $theme-colors: (
   font-family: 'Paperlogy', sans-serif;
 }
 
+html, body, #root {
+  width: 100vw;
+  height: 100vh;
+}
+
 @import 'bootstrap/scss/bootstrap';
 
 @import 'profile';
