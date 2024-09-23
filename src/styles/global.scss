@@ -8,6 +8,7 @@
 $theme-colors: (
   'primary': $indigo-400,
   'secondary': $secondary,
+  'danger': $red-500,
 );
 
 // 5. Include remainder of required parts
@@ -20,6 +21,11 @@ $theme-colors: (
 
 * {
   font-family: 'Paperlogy', sans-serif;
+}
+
+html, body, #root {
+  width: 100vw;
+  height: 100vh;
 }
 
 @import 'bootstrap/scss/bootstrap';
