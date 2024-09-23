@@ -27,7 +27,7 @@ const authService = {
 };
 
 export const post42Code = async (code) => {
-  return authService.post('/42-code', { code });
+  return authService.post('/42-code', { code }).then((res) => res.data);
 };
 
 export const postEmail = async (email) => {
