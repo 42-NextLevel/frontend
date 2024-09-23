@@ -2,6 +2,7 @@ import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { useState } from '@/library/hooks.js';
 import { useNavigate } from '@/library/router/hooks.js';
+import { postEmail } from '@/services/auth.js';
 
 const AuthMail = () => {
   const [email, setEmail] = useState('');
