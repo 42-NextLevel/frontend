@@ -1,5 +1,6 @@
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
+import Lobby from '@/pages/Lobby';
 
 export const routes = [
   {
@@ -9,5 +10,9 @@ export const routes = [
   {
     path: '/auth',
     element: Auth,
+  },
+  {
+    path: '/lobby',
+    element: Lobby,
   },
 ];
