@@ -31,9 +31,9 @@ class VirtualDOM {
     return Array.isArray(newVDOM) ? newVDOM : [newVDOM];
   }
 
-  render(component) {
+  async render(component) {
     if (component) {
-      this.VDOM.function = component;
+      this.VDOM.function = await component;
       this.states.store = [];
       this.cleanUpEffects();
     }

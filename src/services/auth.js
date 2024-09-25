@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/auth`,
+  baseURL: `${import.meta.env.VITE_API_URI}/auth`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,7 +27,7 @@ const authService = {
 };
 
 export const post42Code = async (code) => {
-  return authService.post('/42-code', { code });
+  return authService.post('/42-code', { code }).then((res) => res.data);
 };
 
 export const postEmail = async (email) => {
