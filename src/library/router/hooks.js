@@ -6,3 +6,5 @@ export const useNavigate = () => (path, options) => {
 
 export const useSearchParams = () =>
   new URLSearchParams(window.location.search);
+
+export const useLoaderData = () => $router.loaderData;
