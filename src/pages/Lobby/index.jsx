@@ -5,21 +5,31 @@ import RefreshIcon from '/images/refresh.svg';
 import { getRoomList } from '../../services/game';
 import { getUserProfile } from '../../services/user';
 import { useState, useEffect } from '@/library/hooks.js';
-// import { getTestRoomList, getTestUserProfile } from '../../services/test';
+import { getTestRoomList, getTestUserProfile } from '../../services/test';
 
 const Lobby = () => {
   const [roomList, setRoomList] = useState([]);
   const [userProfile, setUserProfile] = useState();
+  const [page, setPage] = useState(1);
+  const [isPointerOver, setIsPointerOver] = useState(false);
 
   const fetchRoomList = async () => {
-    const response = [...(await getRoomList())];
-    // const response = [...(await getTestRoomList())];
-    setRoomList(response);
+    // const response = [...(await getRoomList())];
+    const response = [...(await getTestRoomList())];
+    const slicedResponse = [];
+
+    for (let i = 0; i < response.length; i += 4) {
+      const chunk = response.slice(i, i + 4);
+      slicedResponse.push(chunk);
+    }
+
+    setRoomList(slicedResponse);
+    setPage(1);
   };
 
   const fetchUserProfile = async () => {
-    const response = await getUserProfile();
-    // const response = await getTestUserProfile();
+    // const response = await getUserProfile();
+    const response = await getTestUserProfile();
     setUserProfile(response);
   };
 
@@ -27,6 +37,23 @@ const Lobby = () => {
     fetchRoomList();
     fetchUserProfile();
   }, []);
+
+  const handleMouseEnter = () => {
+    setIsPointerOver(true);
+    console.log('포인터가 요소 위에 있습니다.');
+  };
+
+  const handleMouseLeave = () => {
+    setIsPointerOver(false);
+    console.log('포인터가 요소를 벗어났습니다.');
+  };
+
+  const handleWheel = () => {
+    if (isPointerOver) {
+      console.log('마우스 휠 이벤트 발생');
+      setPage((prevPage) => (prevPage < roomList.length ? prevPage + 1 : 1));
+    }
+  };
 
   return (
     <div
@@ -50,11 +77,19 @@ const Lobby = () => {
           </div>
         </div>
         <div className='row mx-0 gx-0'>
-          <div className='col-9'>
-            <div className='row mx-0 overflow-scroll' style='height: 310px'>
+          <div
+            className='col-9'
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onWheel={handleWheel}
+          >
+            <div className='row mx-0' style={{ height: '294px' }}>
               {/* 방 리스트 */}
-              {roomList.map((roomInfo) => (
-                <div className='col-6 px-0 pe-3 pb-3'>
+              {roomList[page - 1]?.map((roomInfo, index) => (
+                <div
+                  key={roomInfo.id + 'a'}
+                  className={`col-6 px-0 pe-3 ${index < 2 ? 'pb-3' : ''}`}
+                >
                   <RoomCard {...roomInfo} />
                 </div>
               ))}
