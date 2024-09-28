@@ -12,6 +12,7 @@ const Lobby = () => {
   const [userProfile, setUserProfile] = useState();
   const [page, setPage] = useState(1);
   const [isPointerOver, setIsPointerOver] = useState(false);
+  const [isThrottle, setIsThrottle] = useState(false);
 
   const fetchRoomList = async () => {
     // const response = [...(await getRoomList())];
@@ -48,10 +49,20 @@ const Lobby = () => {
     console.log('포인터가 요소를 벗어났습니다.');
   };
 
-  const handleWheel = () => {
-    if (isPointerOver) {
+  const handleWheel = (event) => {
+    if (isPointerOver && !isThrottle) {
       console.log('마우스 휠 이벤트 발생');
-      setPage((prevPage) => (prevPage < roomList.length ? prevPage + 1 : 1));
+      setIsThrottle(true);
+      if (event.deltaY > 0) {
+        // 휠을 아래로 스크롤
+        setPage((prevPage) => (prevPage < roomList.length ? prevPage + 1 : 1));
+      } else {
+        // 휠을 위로 스크롤
+        setPage((prevPage) => (prevPage > 1 ? prevPage - 1 : roomList.length));
+      }
+      setTimeout(() => {
+        setIsThrottle(false);
+      }, 200);
     }
   };
 
