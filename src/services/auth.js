@@ -35,5 +35,8 @@ export const postEmail = async (email) => {
 };
 
 export const postCode = async (code) => {
-  return authService.post('/code', { code });
+  return authService.post('/code', { code }).then((res) => {
+    const { accessToken } = res.data;
+    localStorage.setItem('access_token', accessToken);
+  });
 };
