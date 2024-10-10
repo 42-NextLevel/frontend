@@ -5,7 +5,6 @@ import RefreshIcon from '/images/refresh.svg';
 import { getRoomList } from '../../services/game';
 import { getUserProfile } from '../../services/user';
 import { useState, useEffect } from '@/library/hooks.js';
-import { getTestRoomList, getTestUserProfile } from '../../services/test';
 import ModalTrigger from '@/components/ModalTrigger';
 import JoinModal from './components/JoinModal';
 import CreateModal from './components/CreateModal';
