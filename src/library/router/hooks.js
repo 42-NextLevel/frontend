@@ -8,3 +8,5 @@ export const useSearchParams = () =>
   new URLSearchParams(window.location.search);
 
 export const useLoaderData = () => $router.loaderData;
+
+export const useParams = () => $router.params;
