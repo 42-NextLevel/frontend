@@ -3,9 +3,9 @@ import userIconFill from '/images/user_icon_fill.svg';
 
 const RoomTile = ({ roomType, name, people }) => {
   return (
-    <div className='card col-sm-6'>
+    <div className='card' style='cursor: pointer;'>
       <Badge roomType={roomType} />
-      <h3 className='mt-2'>{name}</h3>
+      <h5 className='mt-2'>{name}</h5>
       <div className='text-end'>
         <img src={userIconFill} alt='user_icon_fill' />
         {people} / {roomType === 0 ? 2 : 4}
