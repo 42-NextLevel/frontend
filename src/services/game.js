@@ -1,29 +1,29 @@
 import { service } from './index';
 
 export const getHistory = () => {
-  return service.get('/history');
+  return service.get('/game/history');
 };
 
 export const getRoomList = async () => {
-  return service.get('/list').then((res) => res.data);
+  return service.get('/game/list').then((res) => res.data);
 };
 
 export const postMakeRoom = async (data) => {
-  return service.post('/new', data).then((res) => res.data);
+  return service.post('/game/new', data).then((res) => res.data);
 };
 
 export const postJoinRoom = async (data) => {
-  return service.post('/join', data).then((res) => res.data);
+  return service.post('/game/join', data).then((res) => res.data);
 };
 
 export const getRoomInfo = () => {
-  return service.get('/info');
+  return service.get('/game/info');
 };
 
 export const postGameStart = () => {
-  return service.get('/start');
+  return service.get('/game/start');
 };
 
 export const getUserInfo = () => {
-  return service.get('/user-info');
+  return service.get('/game/user-info');
 };
