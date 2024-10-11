@@ -89,6 +89,11 @@ const Lobby = () => {
             <div className='col-9' onWheel={handleWheel}>
               <div className='row mx-0' style='height: 294px'>
                 {/* 방 리스트 */}
+                {roomList.length === 0 && (
+                  <h5 className='col-12 text-center align-self-center text-secondary'>
+                    방이 없습니다
+                  </h5>
+                )}
                 {roomList[page - 1]?.map((roomInfo, index) => (
                   <div
                     key={roomInfo.id}
