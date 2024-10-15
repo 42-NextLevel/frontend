@@ -48,7 +48,7 @@ const CreateModal = ({ id }) => {
           checked
           onClick={() => setMode(0)}
         />
-        <label className='btn btn-outline-primary' for='1v1'>
+        <label className='btn btn-outline-primary' htmlFor='1v1'>
           개인전
         </label>
 
@@ -59,7 +59,7 @@ const CreateModal = ({ id }) => {
           id='tournament'
           onClick={() => setMode(1)}
         />
-        <label className='btn btn-outline-primary' for='tournament'>
+        <label className='btn btn-outline-primary' htmlFor='tournament'>
           토너먼트
         </label>
       </div>
