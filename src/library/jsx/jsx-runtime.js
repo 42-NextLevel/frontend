@@ -5,7 +5,7 @@ export const jsx = (type, props, ...children) => {
   return {
     type,
     props,
-    children: children.flat(2),
+    children: children.flat(2).filter((child) => child),
   };
 };
 
