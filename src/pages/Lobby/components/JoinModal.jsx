@@ -15,14 +15,12 @@ const JoinModal = ({ id, name }) => {
   };
   return (
     <Modal id={id} onClick={joinRoom} title={`\"${name}\" 입장`} btnText='입장'>
-      <div>
-        <Input
-          label='닉네임'
-          type='text'
-          placeholder='참가 닉네임을 입력해주세요'
-          onChange={(e) => setNickname(e.target.value)}
-        />
-      </div>
+      <Input
+        label='닉네임'
+        type='text'
+        placeholder='참가 닉네임을 입력해주세요'
+        onChange={(e) => setNickname(e.target.value)}
+      />
     </Modal>
   );
 };
