@@ -6,7 +6,7 @@ const Modal = ({
   btnText = '확인',
 }) => {
   return (
-    <div class='modal fade' id={id} tabindex='-1'>
+    <div class='modal fade modal-lg' id={id} tabindex='-1'>
       <div class='modal-dialog'>
         <div class='modal-content'>
           <div class='modal-header'>

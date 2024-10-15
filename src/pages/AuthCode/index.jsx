@@ -16,7 +16,7 @@ const AuthCode = () => {
       return alert('인증 코드는 6자리 숫자로 입력해주세요');
     }
     postCode(code).then(() => {
-      navigate('/game', { replace: true });
+      navigate('/lobby', { replace: true });
     });
   };
 
