@@ -3,6 +3,11 @@ import Auth from '@/pages/Auth';
 import AuthMail from '@/pages/AuthMail';
 import AuthCode from '@/pages/AuthCode';
 import Lobby from '@/pages/Lobby';
+import GameRoom from '@/pages/GameRoom';
+
+import { getUserInfo } from './services/room.js';
+
+
 
 export const routes = [
   {
@@ -29,5 +34,10 @@ export const routes = [
   {
     path: '/lobby',
     element: Lobby,
+  },
+  {
+    path: '/room/:roomId',
+    element: GameRoom,
+    loader: getUserInfo(),
   },
 ];
