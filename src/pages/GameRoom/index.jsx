@@ -44,13 +44,17 @@ const GameRoom = () => {
   };
 
   return (
-    <div className='py-5 w-100 min-vh-100 d-flex flex-column align-items-center justify-content-center'>
+    <div className='py-5 wrap min-vh-100 d-flex flex-column align-items-center justify-content-center'>
       <Badge roomType={room.roomType} />
       <h1 className='mt-2'>{room.name}</h1>
-      <ul className='d-flex flex-row py-5 mb-2'>
+      <ul className='w-100 row py-5 mb-2 justify-content-center'>
         {room.players.map((user) => (
-          <li className='list-unstyled mx-2'>
-            <Profile intraId={user.intraId} nickname={user.nickname} />
+          <li className='list-unstyled col-3'>
+            <Profile
+              intraId={user.intraId}
+              nickname={user.nickname}
+              image={user.profileImage}
+            />
           </li>
         ))}
       </ul>

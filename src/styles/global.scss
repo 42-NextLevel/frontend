@@ -28,6 +28,11 @@ html, body, #root {
   height: 100vh;
 }
 
+ul {
+  padding-left: 0;
+  padding-inline-start: 0;
+}
+
 @import 'bootstrap/scss/bootstrap';
 
 @import 'utilities';
