@@ -6,9 +6,9 @@
 
 // 4. Include any default map overrides here
 $theme-colors: (
-  'primary': $indigo-400,
-  'secondary': $secondary,
-  'danger': $red-500,
+        'primary': $indigo-400,
+        'secondary': $secondary,
+        'danger': $red-500,
 );
 
 // 5. Include remainder of required parts
@@ -31,4 +31,4 @@ html, body, #root {
 @import 'bootstrap/scss/bootstrap';
 
 @import 'profile';
-@import 'badge';
+@import 'components';
