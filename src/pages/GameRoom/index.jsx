@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from '@/library/router/hooks';
+import { useLoaderData, useNavigate, useParams } from '@/library/router/hooks';
 import { useEffect, useState } from '@/library/hooks';
 
 import Button from '@/components/Button';
