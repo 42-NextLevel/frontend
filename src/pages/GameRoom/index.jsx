@@ -9,7 +9,7 @@ import { GAME_RULES, TYPES } from './constants.js';
 
 const GameRoom = () => {
   const { roomId } = useParams();
-  const { intraId, nickname } = useLoaderData();
+  const { intra_id, nickname } = useLoaderData();
   const [room, setRoom] = useState({
     name: '',
     roomType: NaN,
@@ -20,7 +20,7 @@ const GameRoom = () => {
 
   useEffect(() => {
     const websocket = new WebSocket(
-      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intraId}`,
+      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intra_id}`,
     );
     websocket.onmessage = (event) => {
       const { type, data } = JSON.parse(event.data);
@@ -54,7 +54,7 @@ const GameRoom = () => {
           </li>
         ))}
       </ul>
-      <Button disabled={room.host === intraId} onClick={handleClick}>
+      <Button disabled={room.host === intra_id} onClick={handleClick}>
         게임 시작
       </Button>
       <h5 className='mt-5'>🏓 게임 규칙</h5>
