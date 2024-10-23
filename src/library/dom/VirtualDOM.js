@@ -82,6 +82,7 @@ class VirtualDOM {
 
   cleanUpEffects() {
     this.effects.store = [];
+    this.effects.deps = [];
     this.effects.cleanUps.forEach((cleanUp) => cleanUp());
     this.effects.cleanUps = [];
   }
