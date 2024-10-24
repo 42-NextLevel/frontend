@@ -30,7 +30,7 @@ const Modal = ({
               <button
                 type='button'
                 class='btn btn-primary'
-                // data-bs-dismiss='modal'
+                data-bs-dismiss='modal'
                 onClick={onClick}
               >
                 {btnText}
