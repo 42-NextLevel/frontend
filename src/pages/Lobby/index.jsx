@@ -3,7 +3,7 @@ import RoomCard from './components/RoomCard';
 import AddRoundIcon from '/images/add-round.svg';
 import RefreshIcon from '/images/refresh.svg';
 import { getRoomList } from '../../services/game';
-import { getUserProfile } from '../../services/user';
+import { getUserProfile, logout } from '../../services/user';
 import { useState, useEffect } from '@/library/hooks.js';
 import ModalTrigger from '@/components/ModalTrigger';
 import JoinModal from './components/JoinModal';
@@ -124,6 +124,22 @@ const Lobby = () => {
               <button
                 type='button'
                 className='btn btn-secondary py-2 mt-3 w-100'
+                onClick={async () => {
+                  try {
+                    const response = await logout();
+                    if (response.status === 200)
+                    {
+                      localStorage.removeItem('access_token');
+                      window.location.href = '/';
+                    }
+                  }
+                  catch(err) {
+                    if (err.response.status === 401)
+                      window.location.href = '/';
+                    else
+                      console.error(err);
+                  }
+                }}
               >
                 로그아웃
               </button>
