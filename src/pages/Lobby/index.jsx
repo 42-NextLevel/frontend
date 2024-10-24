@@ -4,7 +4,7 @@ import AddRoundIcon from '/images/add-round.svg';
 import RefreshIcon from '/images/refresh.svg';
 import { getRoomList } from '../../services/game';
 import { getUserProfile } from '../../services/user';
-import { useState, useEffect } from '@/library/hooks.js';
+import { useEffect, useState } from '@/library/hooks.js';
 import ModalTrigger from '@/components/ModalTrigger';
 import JoinModal from './components/JoinModal';
 import CreateModal from './components/CreateModal';
@@ -16,10 +16,11 @@ const Lobby = () => {
   const [userProfile, setUserProfile] = useState();
   const [page, setPage] = useState(1);
   const [isThrottle, setIsThrottle] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState();
+  const [selectedRoom, setSelectedRoom] = useState({ name: '', id: '' });
 
   const fetchRoomList = async () => {
     const response = [...(await getRoomList())];
+    console.log(response);
     // const response = [...(await getTestRoomList())];
     const slicedResponse = [];
 
@@ -139,7 +140,7 @@ const Lobby = () => {
         {/* 게임 생성 모달 */}
         <CreateModal id='create' />
         {/* 게임 참가 모달 */}
-        <JoinModal {...selectedRoom} id='join' />
+        <JoinModal room={selectedRoom} id='join' />
       </div>
     </>
   );
