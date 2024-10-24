@@ -5,6 +5,8 @@ import Button from '@/components/Button';
 import Profile from '@/components/Profile';
 import Badge from '@/components/Badge';
 
+import { gameStart } from '@/services/room.js';
+
 import { GAME_RULES, TYPES } from './constants.js';
 
 const GameRoom = () => {
