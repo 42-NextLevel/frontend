@@ -44,8 +44,8 @@ const GameRoom = () => {
   }, []);
 
   const handleClick = () => {
-    gameStart(roomId).catch((err) => {
-      alert('error');
+    gameStart(roomId).catch(() => {
+      alert('게임을 시작할 수 없습니다.');
     });
   };
 
