@@ -13,8 +13,13 @@ const JoinModal = ({ id, name }) => {
     };
     const response = await postJoinRoom(data);
   };
+
+  const resetInput = () => {
+    setNickname('');
+  }
+
   return (
-    <Modal id={id} onClick={joinRoom} title={`\"${name}\" 입장`} btnText='입장'>
+    <Modal id={id} onClick={joinRoom} onClose={resetInput} title={`\"${name}\" 입장`} btnText='입장'>
       <Input
         label='닉네임'
         type='text'
