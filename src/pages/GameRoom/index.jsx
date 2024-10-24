@@ -34,7 +34,7 @@ const GameRoom = () => {
         case TYPES.roomUpdate:
           return setRoom(data);
         case TYPES.gameStart:
-          return navigate(`/game/${roomId}`);
+          return navigate(`/game/${roomId}`, { replace: true });
       }
     };
 
