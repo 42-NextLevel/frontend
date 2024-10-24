@@ -2,19 +2,22 @@ import Modal from '@/components/Modal';
 import Input from '@/components/Input';
 import { useState } from '@/library/hooks.js';
 import { postMakeRoom } from '@/services/game';
+import { useNavigate } from '@/library/router/hooks.js';
 
 const CreateModal = ({ id }) => {
   const [roomName, setRoomName] = useState('');
   const [nickname, setNickname] = useState('');
   const [mode, setMode] = useState(0);
+  const navigate = useNavigate();
 
   const makeRoom = async () => {
-    const data = {
+    postMakeRoom({
       name: roomName,
       nickname: nickname,
       roomType: mode,
-    };
-    const response = await postMakeRoom(data);
+    }).then(({ roomId }) => {
+      navigate(`/room/${roomId}`);
+    });
   };
 
   return (

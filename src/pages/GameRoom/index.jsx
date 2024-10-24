@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from '@/library/router/hooks';
+import { useLoaderData, useNavigate, useParams } from '@/library/router/hooks';
 import { useEffect, useState } from '@/library/hooks';
 
 import Button from '@/components/Button';
@@ -9,7 +9,7 @@ import { GAME_RULES, TYPES } from './constants.js';
 
 const GameRoom = () => {
   const { roomId } = useParams();
-  const { intraId, nickname } = useLoaderData();
+  const { intra_id, nickname } = useLoaderData();
   const [room, setRoom] = useState({
     name: '',
     roomType: NaN,
@@ -20,7 +20,7 @@ const GameRoom = () => {
 
   useEffect(() => {
     const websocket = new WebSocket(
-      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intraId}`,
+      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intra_id}`,
     );
     websocket.onmessage = (event) => {
       const { type, data } = JSON.parse(event.data);
@@ -44,17 +44,21 @@ const GameRoom = () => {
   };
 
   return (
-    <div className='py-5 w-100 min-vh-100 d-flex flex-column align-items-center justify-content-center'>
+    <div className='py-5 wrap min-vh-100 d-flex flex-column align-items-center justify-content-center'>
       <Badge roomType={room.roomType} />
       <h1 className='mt-2'>{room.name}</h1>
-      <ul className='d-flex flex-row py-5 mb-2'>
+      <ul className='w-100 row py-5 mb-2 justify-content-center'>
         {room.players.map((user) => (
-          <li className='list-unstyled mx-2'>
-            <Profile intraId={user.intraId} nickname={user.nickname} />
+          <li className='list-unstyled col-3'>
+            <Profile
+              intraId={user.intraId}
+              nickname={user.nickname}
+              image={user.profileImage}
+            />
           </li>
         ))}
       </ul>
-      <Button disabled={room.host === intraId} onClick={handleClick}>
+      <Button disabled={room.host === intra_id} onClick={handleClick}>
         게임 시작
       </Button>
       <h5 className='mt-5'>🏓 게임 규칙</h5>

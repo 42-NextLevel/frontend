@@ -7,8 +7,6 @@ import GameRoom from '@/pages/GameRoom';
 
 import { getUserInfo } from './services/room.js';
 
-
-
 export const routes = [
   {
     path: '/',
@@ -38,6 +36,6 @@ export const routes = [
   {
     path: '/room/:roomId',
     element: GameRoom,
-    loader: getUserInfo(),
+    loader: getUserInfo,
   },
 ];
