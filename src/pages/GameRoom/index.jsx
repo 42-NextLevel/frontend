@@ -22,6 +22,10 @@ const GameRoom = () => {
     const websocket = new WebSocket(
       `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intra_id}`,
     );
+    websocket.onerror = () => {
+      alert('입장 실패');
+      navigate('/lobby', { replace: true });
+    };
     websocket.onmessage = (event) => {
       const { type, data } = JSON.parse(event.data);
       switch (type) {
