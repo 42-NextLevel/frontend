@@ -20,7 +20,6 @@ const Lobby = () => {
 
   const fetchRoomList = async () => {
     const response = [...(await getRoomList())];
-    console.log(response);
     // const response = [...(await getTestRoomList())];
     const slicedResponse = [];
 
