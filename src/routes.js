@@ -7,6 +7,7 @@ import GameRoom from '@/pages/GameRoom';
 import Game from '@/pages/Game';
 
 import { getUserInfo } from './services/room.js';
+import { getPlayersInfo } from './services/game.js';
 
 export const routes = [
   {
@@ -42,6 +43,6 @@ export const routes = [
   {
     path: '/game/:roomId',
     element: Game,
-    loader: getUserInfo,
+    loader: ({ params }) => getPlayersInfo(params.roomId),
   },
 ];
