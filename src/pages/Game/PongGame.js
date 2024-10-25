@@ -8,7 +8,7 @@ const LERP_FACTOR = {
 export class PongGame {
   websocket = null;
 
-  constructor(elementId, webSocketConnectionURI) {
+  constructor(elementId, webSocketConnectionURI, setScore) {
     // Game Objects
     this.objects = {
       ball: null,
@@ -52,6 +52,7 @@ export class PongGame {
     this.initWebSocket(webSocketConnectionURI);
     this.camera.position.set(0, 7, 10);
     this.camera.lookAt(0, 0, 0);
+    this.updateScore = setScore;
   }
 
   createGameObjects() {
@@ -165,7 +166,7 @@ export class PongGame {
   updateGameState({ ball, score }) {
     this.updateBallState(ball);
     this.states.score = score;
-    // updateScore();
+    this.updateScore(score);
   }
 
   updateBallState(ballData) {
