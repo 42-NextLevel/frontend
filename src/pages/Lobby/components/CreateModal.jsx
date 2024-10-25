@@ -20,12 +20,19 @@ const CreateModal = ({ id }) => {
     });
   };
 
+  const resetInput = () => {
+    setRoomName('');
+    setNickname('');
+    setMode(0);
+  }
+
   return (
-    <Modal id={id} onClick={makeRoom} title='방만들기' btnText='만들기'>
+    <Modal id={id} onClick={makeRoom} onClose={resetInput} title='방만들기' btnText='만들기'>
       <Input
         label='방제목'
         type='text'
         placeholder='방 제목을 입력해주세요'
+        value={roomName}
         onChange={(e) => setRoomName(e.target.value)}
       />
 
@@ -33,6 +40,7 @@ const CreateModal = ({ id }) => {
         label='닉네임'
         type='text'
         placeholder='참가 닉네임을 입력해주세요'
+        value={nickname}
         onChange={(e) => setNickname(e.target.value)}
       />
       <div>
@@ -48,8 +56,8 @@ const CreateModal = ({ id }) => {
           className='btn-check'
           name='btnradio'
           id='1v1'
-          checked
-          onClick={() => setMode(0)}
+          checked={mode === 0}
+          onChange={() => setMode(0)}
         />
         <label className='btn btn-outline-primary' htmlFor='1v1'>
           개인전
@@ -60,7 +68,8 @@ const CreateModal = ({ id }) => {
           className='btn-check'
           name='btnradio'
           id='tournament'
-          onClick={() => setMode(1)}
+          checked={mode === 1}
+          onChange={() => setMode(1)}
         />
         <label className='btn btn-outline-primary' htmlFor='tournament'>
           토너먼트

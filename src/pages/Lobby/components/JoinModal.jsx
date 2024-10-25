@@ -20,10 +20,16 @@ const JoinModal = ({ id, room }) => {
         alert('입장할 수 없습니다.');
       });
   };
+
+  const resetInput = () => {
+    setNickname('');
+  }
+
   return (
     <Modal
       id={id}
       onClick={joinRoom}
+      onClose={resetInput}
       title={`\"${room.name}\" 입장`}
       btnText='입장'
     >

@@ -50,7 +50,7 @@ const GameRoom = () => {
   };
 
   return (
-    <div className='py-5 wrap min-vh-100 d-flex flex-column align-items-center justify-content-center'>
+    <div className='py-5 wrap'>
       <Badge roomType={room.roomType} />
       <h1 className='mt-2'>{room.name}</h1>
       <ul className='w-100 row py-5 mb-2 justify-content-center'>

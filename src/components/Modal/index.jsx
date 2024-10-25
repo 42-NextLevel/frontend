@@ -2,6 +2,7 @@ const Modal = ({
   children,
   id,
   onClick,
+  onClose,
   title = '제목을 넣어주세요',
   btnText = '확인',
 }) => {
@@ -15,6 +16,7 @@ const Modal = ({
               type='button'
               class='btn-close'
               data-bs-dismiss='modal'
+              onClick={onClose}
             ></button>
           </div>
           <div class='modal-body'>{children}</div>
@@ -23,6 +25,7 @@ const Modal = ({
               type='button'
               class='btn btn-secondary'
               data-bs-dismiss='modal'
+              onClick={onClose}
             >
               닫기
             </button>
@@ -30,7 +33,7 @@ const Modal = ({
               <button
                 type='button'
                 class='btn btn-primary'
-                // data-bs-dismiss='modal'
+                data-bs-dismiss='modal'
                 onClick={onClick}
               >
                 {btnText}
