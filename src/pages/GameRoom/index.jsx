@@ -5,6 +5,8 @@ import Button from '@/components/Button';
 import Profile from '@/components/Profile';
 import Badge from '@/components/Badge';
 
+import { gameStart } from '@/services/room.js';
+
 import { GAME_RULES, TYPES } from './constants.js';
 
 const GameRoom = () => {
@@ -22,13 +24,17 @@ const GameRoom = () => {
     const websocket = new WebSocket(
       `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intra_id}`,
     );
+    websocket.onerror = () => {
+      alert('입장 실패');
+      navigate('/lobby', { replace: true });
+    };
     websocket.onmessage = (event) => {
       const { type, data } = JSON.parse(event.data);
       switch (type) {
         case TYPES.roomUpdate:
           return setRoom(data);
         case TYPES.gameStart:
-          return navigate(`/game/${roomId}`);
+          return navigate(`/game/${roomId}`, { replace: true });
       }
     };
 
@@ -38,8 +44,8 @@ const GameRoom = () => {
   }, []);
 
   const handleClick = () => {
-    gameStart(roomId).catch((err) => {
-      alert('error');
+    gameStart(roomId).catch(() => {
+      alert('게임을 시작할 수 없습니다.');
     });
   };
 
