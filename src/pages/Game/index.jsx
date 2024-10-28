@@ -8,7 +8,7 @@ const Game = () => {
   const { roomId } = useParams();
   const { nickname } = players.find((player) => player.intraId === intraId);
   const [score, setScore] = useState({ player1: 0, player2: 0 });
-  const connectionURI = `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/game/${roomId}-${matchType}?nickname=${nickname}&intraId=${intraId}`;
+  const connectionURI = `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/game/${roomId}_${matchType}?nickname=${nickname}&intraId=${intraId}`;
 
   useEffect(() => {
     const pongGame = new PongGame(elementId, connectionURI, setScore);

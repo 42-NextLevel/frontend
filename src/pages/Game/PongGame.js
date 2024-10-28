@@ -5,21 +5,24 @@ const LERP_FACTOR = {
   paddle: 0.5,
 };
 
-// 60fps에 맞춘 업데이트 간격 (1000ms / 60 ≈ 16.67ms)
-const UPDATE_INTERVAL = 1000 / 60;
-
 export class PongGame {
   websocket = null;
-  lastUpdateTime = 0; // 마지막 업데이트 시간을 추적하기 위한 변수 추가
 
-  constructor(elementId, webSocketConnectionURI) {
+  constructor(elementId, webSocketConnectionURI, setScore) {
     // Game Objects
     this.objects = {
-      ball: null,
-      playerPaddle: null,
-      opponentPaddle: null,
-      table: null,
-    };
+		ball: null,
+		playerPaddle: null,
+		opponentPaddle: null,
+		table: null,
+		countdownText: null,
+		winnerText: null,
+	  };
+
+	  this.textObjects = {
+		countdown: null,
+		winner: null
+	  };
     // Game States
     this.inputSequence = 0;
     this.isStarted = false;
@@ -41,7 +44,7 @@ export class PongGame {
       score: { player1: 0, player2: 0 },
     };
 
-    const WIDTH = window.innerWidth;
+	const WIDTH = window.innerWidth;
     const HEIGHT = window.innerHeight;
 
     this.scene = new THREE.Scene();
@@ -49,22 +52,18 @@ export class PongGame {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(WIDTH, HEIGHT);
     document.getElementById(elementId).appendChild(this.renderer.domElement);
+    
     this.createGameObjects();
     this.setupLights();
+    this.setupTextSprites();
+    
     document.addEventListener('mousemove', this.onMouseMove);
     window.addEventListener('resize', this.onWindowResize);
     this.initWebSocket(webSocketConnectionURI);
+    
     this.camera.position.set(0, 7, 10);
     this.camera.lookAt(0, 0, 0);
-
-    // 렌더러의 애니메이션 루프를 60fps로 제한
-    this.renderer.setAnimationLoop(() => {
-      const now = performance.now();
-      if (now - this.lastUpdateTime >= UPDATE_INTERVAL) {
-        this.animate();
-        this.lastUpdateTime = now;
-      }
-    });
+    this.updateScore = setScore;
   }
 
   createGameObjects() {
@@ -113,39 +112,24 @@ export class PongGame {
     ) {
       return;
     }
-
-    const now = performance.now();
-    if (now - this.lastUpdateTime < UPDATE_INTERVAL) {
-      return; // 업데이트 주기 제한
-    }
-
     const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    const paddleX = Number((mouseX * 5).toFixed(5));
-    const currentX = this.states.paddle.players[this.playerNumber]?.position.x || 0;
-    
-    // 패들 위치가 실질적으로 변경된 경우에만 업데이트 전송
-    if (Math.abs(currentX - paddleX) < 0.00001) {
-      return;
-    }
-
+    const paddleX = mouseX * 5;
     const input = {
       inputSequence: this.inputSequence++,
-      pressTime: now,
+      pressTime: Date.now(),
       x: paddleX,
     };
-
     // apply input
     if (this.states.paddle.players[this.playerNumber]) {
       this.states.paddle.players[this.playerNumber].position.x = input.x;
     }
-
     // send client update
     const update = {
       type: 'client_state_update',
       player: this.playerNumber,
       position: { x: input.x },
       input_sequence: input.inputSequence,
-      timestamp: now,
+      timestamp: Date.now(),
     };
     this.websocket.send(JSON.stringify(update));
   };
@@ -171,8 +155,246 @@ export class PongGame {
         return this.updateOpponentPaddle(data);
       case 'game_state_update':
         return this.updateGameState(data);
+      case 'countdown':
+        return this.handleCountdown(data);
+      case 'game_end':
+        return this.handleGameEnd(data);
+      case 'countdown_start':
+        return this.handleCountdownStart();
     }
   }
+  setupTextSprites() {
+    // 카운트다운 텍스트 스프라이트 생성
+    this.textObjects = {
+      countdown: this.createTextSprite(''),
+      winner: this.createTextSprite(''),
+      subText: this.createTextSprite('') // 추가 안내 텍스트를 위한 스프라이트
+    };
+    
+    // 메인 카운트다운 텍스트
+    this.textObjects.countdown.position.set(0, 3, 0);
+    this.textObjects.countdown.visible = false;
+    this.scene.add(this.textObjects.countdown);
+    
+    // 승자 텍스트
+    this.textObjects.winner.position.set(0, 3, 0);
+    this.textObjects.winner.visible = false;
+    this.scene.add(this.textObjects.winner);
+    
+    // 부가 설명 텍스트 (준비 안내, 게임 종료 카운트다운 등)
+    this.textObjects.subText.position.set(0, 2, 0);
+    this.textObjects.subText.visible = false;
+    this.scene.add(this.textObjects.subText);
+  }
+
+  createTextSprite(text, size = 48, color = '#ffffff') {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    // 캔버스 크기를 더 넓게 설정
+    canvas.width = 1024; // 512에서 1024로 증가
+    canvas.height = 256; // 128에서 256으로 증가
+    
+    context.font = `bold ${size}px Arial`;
+    context.fillStyle = color;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    
+    context.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    context.shadowBlur = 4;
+    context.shadowOffsetX = 2;
+    context.shadowOffsetY = 2;
+    
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ 
+        map: texture, 
+        transparent: true,
+        opacity: 1
+    });
+    
+    const sprite = new THREE.Sprite(material);
+    // 스프라이트 스케일 조정 - 더 넓은 가로 비율 적용
+    sprite.scale.set(8, 2, 1); // 4, 1, 1에서 8, 2, 1로 변경
+    
+    return sprite;
+}
+
+
+  updateTextSprite(type, text) {
+    const sprite = this.textObjects[type];
+    if (!sprite) return;
+
+    const size = type === 'countdown' ? 64 : 48;
+    const newSprite = this.createTextSprite(text, size);
+    
+    // 위치와 스케일 복사
+    newSprite.position.copy(sprite.position);
+    newSprite.scale.copy(sprite.scale);
+    
+    // 이전 스프라이트 제거 및 리소스 정리
+    this.scene.remove(sprite);
+    sprite.material.map.dispose();
+    sprite.material.dispose();
+    
+    // 새 스프라이트 추가
+    this.textObjects[type] = newSprite;
+    this.scene.add(newSprite);
+    newSprite.visible = text !== '';
+  }
+
+  handleCountdownStart() {
+    this.isStarted = false;
+    
+    // "Get Ready!" 텍스트를 페이드인 효과로 표시
+    this.updateTextSprite('countdown', 'Get Ready!');
+    this.updateTextSprite('subText', 'Game starts in...');
+    
+    this.textObjects.countdown.visible = true;
+    this.textObjects.subText.visible = true;
+    
+    // 텍스트 페이드인 효과
+    this.textObjects.countdown.material.opacity = 0;
+    this.textObjects.subText.material.opacity = 0;
+    
+    this.fadeInText(this.textObjects.countdown);
+    this.fadeInText(this.textObjects.subText);
+  }
+
+  fadeInText(textSprite) {
+    const fadeIn = () => {
+      if (textSprite.material.opacity < 1) {
+        textSprite.material.opacity += 0.05;
+        requestAnimationFrame(fadeIn);
+      }
+    };
+    fadeIn();
+  }
+
+  fadeOutText(textSprite, callback) {
+    const fadeOut = () => {
+      if (textSprite.material.opacity > 0) {
+        textSprite.material.opacity -= 0.05;
+        requestAnimationFrame(fadeOut);
+      } else {
+        textSprite.visible = false;
+        if (callback) callback();
+      }
+    };
+    fadeOut();
+  }
+
+  handleCountdown({ count }) {
+		// count가 숫자인 경우와 'GO!' 문자열인 경우를 명확히 구분
+		const countValue = count.toString(); // 숫자든 문자열이든 문자열로 변환
+		console.log('Countdown value:', countValue, typeof count); // 디버깅용
+
+		// 모든 텍스트 객체 표시 상태 초기화
+		this.textObjects.countdown.visible = true;
+		this.textObjects.countdown.material.opacity = 1;
+		this.textObjects.subText.visible = true;
+		this.textObjects.subText.material.opacity = 1;
+
+		if (countValue === 'GO!') {
+			// GO! 메시지 표시
+			this.updateTextSprite('countdown', 'GO!', 72);
+			this.updateTextSprite('subText', '');
+			
+			// 1초 후에 모든 텍스트 페이드아웃
+			setTimeout(() => {
+				this.fadeOutText(this.textObjects.countdown, () => {
+					this.isStarted = true;
+				});
+				this.fadeOutText(this.textObjects.subText);
+			}, 1000);
+		} else {
+			// 숫자 카운트다운
+			const fontSize = 64;
+			this.updateTextSprite('countdown', countValue, fontSize);
+			this.updateTextSprite('subText', 'Get Ready!', 36);
+			
+			// 숫자가 변경될 때 약간의 애니메이션 효과 추가
+			this.textObjects.countdown.scale.set(9, 2.2, 1); // 잠시 크게
+			setTimeout(() => {
+				this.textObjects.countdown.scale.set(8, 2, 1); // 원래 크기로
+			}, 100);
+		}
+	}
+
+  handleGameEnd({ winner }) {
+    this.isStarted = false;
+    
+    // 게임 오브젝트 초기화
+    this.objects.ball.position.set(0, 0.2, 0);
+    this.objects.playerPaddle.position.set(0, 0.1, 7);
+    this.objects.opponentPaddle.position.set(0, 0.1, -7);
+    
+    // 승자 스코어 업데이트
+    const winnerScore = winner === 'player1' ? 'player1' : 'player2';
+    this.states.score[winnerScore]++;
+    this.updateScore(this.states.score);
+    
+    // 승자 발표 텍스트 표시
+    const winnerText = `${winner === 'player1' ? 'Player 1' : 'Player 2'} Wins!`;
+    this.updateTextSprite('winner', winnerText, 64);
+    this.textObjects.winner.visible = true;
+    this.fadeInText(this.textObjects.winner);
+
+    // 카운트다운 시작
+    let countdown = 3;
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        this.updateTextSprite('subText', `Returning to lobby in ${countdown}...`, 36);
+        this.textObjects.subText.visible = true;
+      } else {
+        clearInterval(countdownInterval);
+        this.fadeOutText(this.textObjects.winner);
+        this.fadeOutText(this.textObjects.subText, () => {
+          window.location.href = 'www.example.com';
+        });
+      }
+    }, 1000);
+  }
+
+
+  
+
+  dispose() {
+    // 이벤트 리스너 제거
+    document.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('resize', this.onWindowResize);
+    
+    // WebSocket 연결 종료
+    if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+      this.websocket.close();
+    }
+    
+    // Three.js 리소스 정리
+    Object.values(this.textObjects).forEach(sprite => {
+      if (sprite) {
+        sprite.material.map.dispose();
+        sprite.material.dispose();
+      }
+    });
+    
+    this.scene.traverse((object) => {
+      if (object.geometry) {
+        object.geometry.dispose();
+      }
+      if (object.material) {
+        if (object.material.map) object.material.map.dispose();
+        object.material.dispose();
+      }
+    });
+    
+    this.renderer.dispose();
+  }
+
+
+
 
   setGameStarted() {
     this.isStarted = true;
@@ -193,12 +415,14 @@ export class PongGame {
   updateGameState({ ball, score }) {
     this.updateBallState(ball);
     this.states.score = score;
+    this.updateScore(score);
   }
 
   updateBallState(ballData) {
     if (!ballData) {
       return;
     }
+    // 공 상태 업데이트
     this.states.ball = {
       position: {
         x: ballData.position.x,
@@ -212,6 +436,7 @@ export class PongGame {
       },
       timestamp: ballData.timestamp,
     };
+    // 게임 오브젝트 업데이트
     this.updateGameObjects();
   }
 
@@ -267,6 +492,7 @@ export class PongGame {
   }
 
   animate = () => {
+    window.requestAnimationFrame(this.animate);
     if (this.isStarted) {
       this.updateGameObjects();
     }
