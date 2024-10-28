@@ -5,10 +5,14 @@ const LERP_FACTOR = {
   paddle: 0.5,
 };
 
+// 60fps에 맞춘 업데이트 간격 (1000ms / 60 ≈ 16.67ms)
+const UPDATE_INTERVAL = 1000 / 60;
+
 export class PongGame {
   websocket = null;
+  lastUpdateTime = 0; // 마지막 업데이트 시간을 추적하기 위한 변수 추가
 
-  constructor(elementId, webSocketConnectionURI, setScore) {
+  constructor(elementId, webSocketConnectionURI) {
     // Game Objects
     this.objects = {
       ball: null,
@@ -52,7 +56,15 @@ export class PongGame {
     this.initWebSocket(webSocketConnectionURI);
     this.camera.position.set(0, 7, 10);
     this.camera.lookAt(0, 0, 0);
-    this.updateScore = setScore;
+
+    // 렌더러의 애니메이션 루프를 60fps로 제한
+    this.renderer.setAnimationLoop(() => {
+      const now = performance.now();
+      if (now - this.lastUpdateTime >= UPDATE_INTERVAL) {
+        this.animate();
+        this.lastUpdateTime = now;
+      }
+    });
   }
 
   createGameObjects() {
@@ -101,24 +113,39 @@ export class PongGame {
     ) {
       return;
     }
+
+    const now = performance.now();
+    if (now - this.lastUpdateTime < UPDATE_INTERVAL) {
+      return; // 업데이트 주기 제한
+    }
+
     const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    const paddleX = mouseX * 5;
+    const paddleX = Number((mouseX * 5).toFixed(5));
+    const currentX = this.states.paddle.players[this.playerNumber]?.position.x || 0;
+    
+    // 패들 위치가 실질적으로 변경된 경우에만 업데이트 전송
+    if (Math.abs(currentX - paddleX) < 0.00001) {
+      return;
+    }
+
     const input = {
       inputSequence: this.inputSequence++,
-      pressTime: Date.now(),
+      pressTime: now,
       x: paddleX,
     };
+
     // apply input
     if (this.states.paddle.players[this.playerNumber]) {
       this.states.paddle.players[this.playerNumber].position.x = input.x;
     }
+
     // send client update
     const update = {
       type: 'client_state_update',
       player: this.playerNumber,
       position: { x: input.x },
       input_sequence: input.inputSequence,
-      timestamp: Date.now(),
+      timestamp: now,
     };
     this.websocket.send(JSON.stringify(update));
   };
@@ -166,14 +193,12 @@ export class PongGame {
   updateGameState({ ball, score }) {
     this.updateBallState(ball);
     this.states.score = score;
-    this.updateScore(score);
   }
 
   updateBallState(ballData) {
     if (!ballData) {
       return;
     }
-    // 공 상태 업데이트
     this.states.ball = {
       position: {
         x: ballData.position.x,
@@ -187,7 +212,6 @@ export class PongGame {
       },
       timestamp: ballData.timestamp,
     };
-    // 게임 오브젝트 업데이트
     this.updateGameObjects();
   }
 
@@ -243,7 +267,6 @@ export class PongGame {
   }
 
   animate = () => {
-    window.requestAnimationFrame(this.animate);
     if (this.isStarted) {
       this.updateGameObjects();
     }
