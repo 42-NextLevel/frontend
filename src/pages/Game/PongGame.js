@@ -147,9 +147,31 @@ export class PongGame {
 
   handleServerMessage(data) {
     switch (data.type) {
+		case 'sync_time':
+			const clientTime = Date.now();
+			const serverTimestamp = data.server_timestamp;  // 서버에서 보낸 타임스탬프
+			this.serverTimeDiff = serverTimestamp - clientTime;
+			console.log('Time sync:', {
+				clientTime,
+				serverTime: serverTimestamp,
+				diff: this.serverTimeDiff
+			});
+			break;	
       case 'game_start':
         return this.setGameStarted();
+	  case 'countdown_sequence':
+		if (this.serverTimeDiff === undefined) {
+			// 시간 동기화가 아직 안 됐으면 잠시 대기 후 재시도
+			setTimeout(() => this.handleCountdownSequence(data), 100);
+			return;
+		}
+		this.handleCountdownSequence(data);
+		break;
       case 'player_assigned':
+		this.websocket.send(JSON.stringify({
+			type: 'sync_time',
+			client_time: Date.now()  // timestamp 대신 client_time 사용
+		  }));
         return this.setPlayerNumber(data);
       case 'opponent_update':
         return this.updateOpponentPaddle(data);
@@ -159,10 +181,26 @@ export class PongGame {
         return this.handleCountdown(data);
       case 'game_end':
         return this.handleGameEnd(data);
-      case 'countdown_start':
-        return this.handleCountdownStart();
     }
   }
+
+  handleCountdownSequence(data) {
+	const sequence = data.sequence;
+	const serverTime = data.server_time * 1000; // 서버 시간을 밀리초로 변환
+	const clientTime = Date.now();
+	const timeDiff = clientTime - serverTime; // 서버와 클라이언트의 시간 차이
+	
+	// 각 카운트다운에 대해 타이머 설정
+	sequence.forEach(item => {
+	  const delay = item.delay * 1000; // 딜레이를 밀리초로 변환
+	  const adjustedDelay = Math.max(0, delay - timeDiff); // 시간 차이를 고려한 딜레이 계산
+	  
+	  setTimeout(() => {
+		this.handleCountdown({count: item.count});
+	  }, adjustedDelay);
+	});
+  }
+  
   setupTextSprites() {
     // 카운트다운 텍스트 스프라이트 생성
     this.textObjects = {
@@ -245,83 +283,75 @@ export class PongGame {
     newSprite.visible = text !== '';
   }
 
-  handleCountdownStart() {
-    this.isStarted = false;
-    
-    // "Get Ready!" 텍스트를 페이드인 효과로 표시
-    this.updateTextSprite('countdown', 'Get Ready!');
-    this.updateTextSprite('subText', 'Game starts in...');
-    
-    this.textObjects.countdown.visible = true;
-    this.textObjects.subText.visible = true;
-    
-    // 텍스트 페이드인 효과
-    this.textObjects.countdown.material.opacity = 0;
-    this.textObjects.subText.material.opacity = 0;
-    
-    this.fadeInText(this.textObjects.countdown);
-    this.fadeInText(this.textObjects.subText);
+  handleCountdown({ count }) {
+	const countValue = count.toString();
+	
+	// 모든 텍스트 객체 표시 상태 초기화
+	this.textObjects.countdown.visible = true;
+	this.textObjects.countdown.material.opacity = 0;  // 시작은 투명하게
+	this.textObjects.subText.visible = true;
+	this.textObjects.subText.material.opacity = 0;   // 시작은 투명하게
+	
+	if (countValue === 'GO!') {
+	  // GO! 메시지 표시
+	  this.updateTextSprite('countdown', 'GO!', 72);
+	  this.updateTextSprite('subText', '');
+	  
+	  // 페이드인 효과 적용
+	  this.fadeInText(this.textObjects.countdown);
+	  
+	  // 1초 후에 모든 텍스트 페이드아웃
+	  setTimeout(() => {
+		this.fadeOutText(this.textObjects.countdown, () => {
+		  this.isStarted = true;
+		});
+		this.fadeOutText(this.textObjects.subText);
+	  }, 1000);
+	} else {
+	  // 숫자 카운트다운
+	  const fontSize = 64;
+	  this.updateTextSprite('countdown', countValue, fontSize);
+	  this.updateTextSprite('subText', 'Get Ready!', 36);
+	  
+	  // 페이드인 효과 적용
+	  this.fadeInText(this.textObjects.countdown);
+	  this.fadeInText(this.textObjects.subText);
+	  
+	  // 숫자가 변경될 때 애니메이션 효과
+	  this.textObjects.countdown.scale.set(9, 2.2, 1);
+	  setTimeout(() => {
+		this.textObjects.countdown.scale.set(8, 2, 1);
+		// 이전 숫자를 페이드아웃
+		setTimeout(() => {
+		  this.fadeOutText(this.textObjects.countdown);
+		  this.fadeOutText(this.textObjects.subText);
+		}, 800);  // 0.8초 후에 페이드아웃 시작
+	  }, 100);
+	}
   }
 
   fadeInText(textSprite) {
-    const fadeIn = () => {
-      if (textSprite.material.opacity < 1) {
-        textSprite.material.opacity += 0.05;
-        requestAnimationFrame(fadeIn);
-      }
-    };
-    fadeIn();
+	const fadeIn = () => {
+	  if (textSprite.material.opacity < 1) {
+		textSprite.material.opacity += 0.05;
+		requestAnimationFrame(fadeIn);
+	  }
+	};
+	fadeIn();
   }
-
+  
   fadeOutText(textSprite, callback) {
-    const fadeOut = () => {
-      if (textSprite.material.opacity > 0) {
-        textSprite.material.opacity -= 0.05;
-        requestAnimationFrame(fadeOut);
-      } else {
-        textSprite.visible = false;
-        if (callback) callback();
-      }
-    };
-    fadeOut();
+	const fadeOut = () => {
+	  if (textSprite.material.opacity > 0) {
+		textSprite.material.opacity -= 0.05;
+		requestAnimationFrame(fadeOut);
+	  } else {
+		textSprite.visible = false;
+		if (callback) callback();
+	  }
+	};
+	fadeOut();
   }
-
-  handleCountdown({ count }) {
-		// count가 숫자인 경우와 'GO!' 문자열인 경우를 명확히 구분
-		const countValue = count.toString(); // 숫자든 문자열이든 문자열로 변환
-		console.log('Countdown value:', countValue, typeof count); // 디버깅용
-
-		// 모든 텍스트 객체 표시 상태 초기화
-		this.textObjects.countdown.visible = true;
-		this.textObjects.countdown.material.opacity = 1;
-		this.textObjects.subText.visible = true;
-		this.textObjects.subText.material.opacity = 1;
-
-		if (countValue === 'GO!') {
-			// GO! 메시지 표시
-			this.updateTextSprite('countdown', 'GO!', 72);
-			this.updateTextSprite('subText', '');
-			
-			// 1초 후에 모든 텍스트 페이드아웃
-			setTimeout(() => {
-				this.fadeOutText(this.textObjects.countdown, () => {
-					this.isStarted = true;
-				});
-				this.fadeOutText(this.textObjects.subText);
-			}, 1000);
-		} else {
-			// 숫자 카운트다운
-			const fontSize = 64;
-			this.updateTextSprite('countdown', countValue, fontSize);
-			this.updateTextSprite('subText', 'Get Ready!', 36);
-			
-			// 숫자가 변경될 때 약간의 애니메이션 효과 추가
-			this.textObjects.countdown.scale.set(9, 2.2, 1); // 잠시 크게
-			setTimeout(() => {
-				this.textObjects.countdown.scale.set(8, 2, 1); // 원래 크기로
-			}, 100);
-		}
-	}
 
   handleGameEnd({ winner }) {
     this.isStarted = false;
