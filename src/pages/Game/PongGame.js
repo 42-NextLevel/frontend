@@ -353,7 +353,7 @@ export class PongGame {
 	fadeOut();
   }
 
-  handleGameEnd({ winner }) {
+  handleGameEnd({ winner, match }) {
     this.isStarted = false;
     
     // 게임 오브젝트 초기화
@@ -380,10 +380,28 @@ export class PongGame {
         this.updateTextSprite('subText', `Returning to lobby in ${countdown}...`, 36);
         this.textObjects.subText.visible = true;
       } else {
+		
         clearInterval(countdownInterval);
         this.fadeOutText(this.textObjects.winner);
         this.fadeOutText(this.textObjects.subText, () => {
-          window.location.href = 'www.example.com';
+			// 패자는 게임 종료 후에 로비로 이동
+			// 개인전인 경우 승자도 로비로 이동
+			// 토너먼트인 경우 room/:roomId 경로로 이동(승자만)
+			
+			if (winner !== this.playerNumber) {
+				window.location.replace('/lobby');
+				return;
+			}
+
+			if (match === '0') {
+				// 개인전인 경우 승자도 로비로
+				window.location.href = '/lobby';
+			} else {
+				// 토너먼트인 경우 room/:roomId로
+				const roomId = window.location.pathname.split('/')[2]; // URL에서 roomId 추출
+				window.location.href = `/room/${roomId}`;
+			}
+
         });
       }
     }, 1000);
