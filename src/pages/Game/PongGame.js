@@ -5,11 +5,14 @@ const LERP_FACTOR = {
   paddle: 0.5,
 };
 
+const PADDLE_SPEED = 0.2; // Paddle movement speed
+
+
 export class PongGame {
   websocket = null;
+  keys = { left: false, right: false };
 
   constructor(elementId, webSocketConnectionURI, setScore) {
-    // Game Objects
     this.objects = {
       ball: null,
       playerPaddle: null,
@@ -23,7 +26,7 @@ export class PongGame {
       countdown: null,
       winner: null,
     };
-    // Game States
+
     this.inputSequence = 0;
     this.isStarted = false;
     this.playerNumber = '';
@@ -57,14 +60,63 @@ export class PongGame {
     this.setupLights();
     this.setupTextSprites();
 
-    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('keydown', this.onKeyDown);
+    document.addEventListener('keyup', this.onKeyUp);
     window.addEventListener('resize', this.onWindowResize);
     this.initWebSocket(webSocketConnectionURI);
 
     this.camera.position.set(0, 7, 10);
     this.camera.lookAt(0, 0, 0);
     this.updateScore = setScore;
+
+    this.processInput();
   }
+
+  onKeyDown = (event) => {
+    if (event.key === 'ArrowLeft') this.keys.left = true;
+    if (event.key === 'ArrowRight') this.keys.right = true;
+  };
+
+  onKeyUp = (event) => {
+    if (event.key === 'ArrowLeft') this.keys.left = false;
+    if (event.key === 'ArrowRight') this.keys.right = false;
+  };
+
+  processInput = () => {
+    if (
+      this.isStarted &&
+      this.playerNumber &&
+      this.websocket?.readyState === WebSocket.OPEN
+    ) {
+      let currentX = this.states.paddle.players[this.playerNumber].position.x;
+      
+      if (this.keys.left) currentX -= PADDLE_SPEED;
+      if (this.keys.right) currentX += PADDLE_SPEED;
+      
+      // Clamp paddle position to table bounds (-5 to 5)
+      currentX = Math.max(-4, Math.min(4, currentX));
+
+      if (currentX !== this.states.paddle.players[this.playerNumber].position.x) {
+        const input = {
+          inputSequence: this.inputSequence++,
+          pressTime: Date.now(),
+          x: currentX,
+        };
+
+        this.states.paddle.players[this.playerNumber].position.x = input.x;
+
+        const update = {
+          type: 'client_state_update',
+          player: this.playerNumber,
+          position: { x: input.x },
+          input_sequence: input.inputSequence,
+          timestamp: Date.now(),
+        };
+        this.websocket.send(JSON.stringify(update));
+      }
+    }
+    requestAnimationFrame(this.processInput);
+  };
 
   createGameObjects() {
     // Ball
@@ -102,36 +154,6 @@ export class PongGame {
     this.camera.aspect = WIDTH / HEIGHT;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(WIDTH, HEIGHT);
-  };
-
-  onMouseMove = (event) => {
-    if (
-      !this.isStarted ||
-      !this.playerNumber ||
-      this.websocket?.readyState !== WebSocket.OPEN
-    ) {
-      return;
-    }
-    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-    const paddleX = mouseX * 5;
-    const input = {
-      inputSequence: this.inputSequence++,
-      pressTime: Date.now(),
-      x: paddleX,
-    };
-    // apply input
-    if (this.states.paddle.players[this.playerNumber]) {
-      this.states.paddle.players[this.playerNumber].position.x = input.x;
-    }
-    // send client update
-    const update = {
-      type: 'client_state_update',
-      player: this.playerNumber,
-      position: { x: input.x },
-      input_sequence: input.inputSequence,
-      timestamp: Date.now(),
-    };
-    this.websocket.send(JSON.stringify(update));
   };
 
   initWebSocket(webSocketConnectionURI) {
@@ -289,9 +311,9 @@ export class PongGame {
 
     // 모든 텍스트 객체 표시 상태 초기화
     this.textObjects.countdown.visible = true;
-    this.textObjects.countdown.material.opacity = 0; // 시작은 투명하게
+    this.textObjects.countdown.material.opacity = 0;
     this.textObjects.subText.visible = true;
-    this.textObjects.subText.material.opacity = 0; // 시작은 투명하게
+    this.textObjects.subText.material.opacity = 0;
 
     if (countValue === 'GO!') {
       // GO! 메시지 표시
@@ -367,8 +389,19 @@ export class PongGame {
     this.states.score[winnerScore]++;
     this.updateScore(this.states.score);
 
-    // 승자 발표 텍스트 표시
-    const winnerText = `${winner === 'player1' ? 'Player 1' : 'Player 2'} Wins!`;
+    // 결승전(3)이나 3,4위전(4)인 경우 순위 표시
+    let winnerText;
+    if (match === '3' || match === '0') {
+        // 결승전
+        winnerText = this.playerNumber === winner ? '🏆 Champion!' : '2nd Place';
+    } else if (match === '4') {
+        // 3,4위전
+        winnerText = this.playerNumber === winner ? '3rd Place' : '4th Place';
+    } else {
+        // 일반 게임
+        winnerText = `${winner === 'player1' ? 'Player 1' : 'Player 2'} Wins!`;
+    }
+
     this.updateTextSprite('winner', winnerText, 64);
     this.textObjects.winner.visible = true;
     this.fadeInText(this.textObjects.winner);
@@ -378,49 +411,37 @@ export class PongGame {
     const countdownInterval = setInterval(() => {
       countdown--;
       if (countdown > 0) {
-        this.updateTextSprite(
-          'subText',
-          `Returning to lobby in ${countdown}...`,
-          36,
-        );
+        this.updateTextSprite('subText', `Returning to lobby in ${countdown}...`, 36);
         this.textObjects.subText.visible = true;
       } else {
         clearInterval(countdownInterval);
         this.fadeOutText(this.textObjects.winner);
         this.fadeOutText(this.textObjects.subText, () => {
-          // 패자는 게임 종료 후에 로비로 이동
-          // 개인전인 경우 승자도 로비로 이동
-          // 토너먼트인 경우 room/:roomId 경로로 이동(승자만)
-
           if (winner !== this.playerNumber) {
             window.location.replace('/lobby');
             return;
           }
 
-          if (match === '0') {
-            // 개인전인 경우 승자도 로비로
-            window.location.href = '/lobby';
-          } else {
-            // 토너먼트인 경우 room/:roomId로
-            const roomId = window.location.pathname.split('/')[2]; // URL에서 roomId 추출
-            window.location.href = `/room/${roomId}`;
-          }
+          // 매치가 1 or 2가 아닌 경우는 로비로 이동
+		  // 매치가 1 or 2인 경우는 다음 매치로 이동
+		  // 매치가 1 or 2인 경우에는 join api 호출
+		  // final match인 경우는 room_id는 roomId + '_final'로 설정
+		  // 3, 4위전인 경우는 room_id는 roomId + '_3rd'로 설정
         });
       }
     }, 1000);
-  }
+}
 
-  dispose() {
-    // 이벤트 리스너 제거
-    document.removeEventListener('mousemove', this.onMouseMove);
+dispose() {
+    // Update event listener cleanup
+    document.removeEventListener('keydown', this.onKeyDown);
+    document.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('resize', this.onWindowResize);
 
-    // WebSocket 연결 종료
     if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
       this.websocket.close();
     }
 
-    // Three.js 리소스 정리
     Object.values(this.textObjects).forEach((sprite) => {
       if (sprite) {
         sprite.material.map.dispose();
@@ -440,6 +461,7 @@ export class PongGame {
 
     this.renderer.dispose();
   }
+
 
   setGameStarted() {
     this.isStarted = true;
@@ -465,25 +487,42 @@ export class PongGame {
 
   updateBallState(ballData) {
     if (!ballData) {
-      return;
+        return;
     }
+
+    // 현재 위치와 새로운 위치의 거리가 큰 경우 (리셋되는 경우) 즉시 이동
+    const currentPos = this.objects.ball.position;
+    const newPos = new THREE.Vector3(
+        ballData.position.x,
+        ballData.position.y,
+        ballData.position.z
+    );
+    
+    // 중앙 위치({x: 0, y: 0.2, z: 0})로 이동하는 경우 즉시 이동
+    if (ballData.position.x === 0 && 
+        ballData.position.y === 0.2 && 
+        ballData.position.z === 0) {
+        this.objects.ball.position.copy(newPos);
+    }
+
     // 공 상태 업데이트
     this.states.ball = {
-      position: {
-        x: ballData.position.x,
-        y: ballData.position.y,
-        z: ballData.position.z,
-      },
-      velocity: {
-        x: ballData.velocity.x,
-        y: ballData.velocity.y,
-        z: ballData.velocity.z,
-      },
-      timestamp: ballData.timestamp,
+        position: {
+            x: ballData.position.x,
+            y: ballData.position.y,
+            z: ballData.position.z,
+        },
+        velocity: {
+            x: ballData.velocity.x,
+            y: ballData.velocity.y,
+            z: ballData.velocity.z,
+        },
+        timestamp: ballData.timestamp,
     };
-    // 게임 오브젝트 업데이트
+
+    // 일반적인 게임 오브젝트 업데이트 (보간 적용)
     this.updateGameObjects();
-  }
+}
 
   updateGameObjects() {
     if (!this.playerNumber) {
