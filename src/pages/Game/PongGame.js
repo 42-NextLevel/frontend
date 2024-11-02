@@ -391,15 +391,15 @@ export class PongGame {
  
 	// 결승전(3)이나 3,4위전(4)인 경우 순위 표시
 	let winnerText;
-	if (match === '3' || match === '0') {
+	if (match === '3') {
 		// 결승전일 때 각 플레이어의 화면에 맞는 텍스트 표시
-		winnerText = winner === this.playerNumber ? '🏆 Champion!' : '2nd Place';
+		winnerText = winner === this.playerNumber ?  '2nd Place' : '🏆 Champion!';
 	} else if (match === '4') {
 		// 3,4위전일 때 각 플레이어의 화면에 맞는 텍스트 표시
-		winnerText = winner === this.playerNumber ? '3rd Place' : '4th Place';
-	} else {
+		winnerText = winner === this.playerNumber ? '4th Place' : '3rd Place';
+	} else if (match === '0' || match === '1' || match === '2') {
 		// 일반 게임일 때 승/패 표시
-		winnerText = winner === this.playerNumber ? 'You Win!' : 'You Lose!';
+		winnerText = winner === this.playerNumber ? 'You Lose!' : 'You Win!';
 	}
  
 	// 텍스트 업데이트 및 표시
