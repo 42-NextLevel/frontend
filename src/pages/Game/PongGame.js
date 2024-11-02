@@ -83,39 +83,44 @@ export class PongGame {
   };
 
   processInput = () => {
-    if (
-      this.isStarted &&
-      this.playerNumber &&
-      this.websocket?.readyState === WebSocket.OPEN
-    ) {
-      let currentX = this.states.paddle.players[this.playerNumber].position.x;
-      
-      if (this.keys.left) currentX -= PADDLE_SPEED;
-      if (this.keys.right) currentX += PADDLE_SPEED;
-      
-      // Clamp paddle position to table bounds (-5 to 5)
-      currentX = Math.max(-4, Math.min(4, currentX));
-
-      if (currentX !== this.states.paddle.players[this.playerNumber].position.x) {
-        const input = {
-          inputSequence: this.inputSequence++,
-          pressTime: Date.now(),
-          x: currentX,
-        };
-
-        this.states.paddle.players[this.playerNumber].position.x = input.x;
-
-        const update = {
-          type: 'client_state_update',
-          player: this.playerNumber,
-          position: { x: input.x },
-          input_sequence: input.inputSequence,
-          timestamp: Date.now(),
-        };
-        this.websocket.send(JSON.stringify(update));
-      }
-    }
-    requestAnimationFrame(this.processInput);
+	if (
+	  this.isStarted &&
+	  this.playerNumber &&
+	  this.websocket?.readyState === WebSocket.OPEN
+	) {
+	  let currentX = this.states.paddle.players[this.playerNumber].position.x;
+	  
+	  if (this.keys.left) currentX -= PADDLE_SPEED;
+	  if (this.keys.right) currentX += PADDLE_SPEED;
+	  
+	  // Clamp paddle position to table bounds (-4 to 4)
+	  currentX = Math.max(-4, Math.min(4, currentX));
+ 
+	  // 위치값 반올림 (소수점 3자리)
+	  currentX = Math.round(currentX * 1000) / 1000;
+	  const lastPosition = Math.round(this.states.paddle.players[this.playerNumber].position.x * 1000) / 1000;
+ 
+	  // 의미있는 위치 변화가 있는 경우만 업데이트
+	  if (Math.abs(currentX - lastPosition) >= 0.001) {
+		const input = {
+		  inputSequence: this.inputSequence++,
+		  pressTime: Date.now(),
+		  x: currentX,
+		};
+ 
+		this.states.paddle.players[this.playerNumber].position.x = input.x;
+ 
+		const update = {
+		  type: 'client_state_update',
+		  player: this.playerNumber,
+		  position: { x: input.x },
+		  input_sequence: input.inputSequence,
+		  timestamp: Date.now(),
+		};
+		this.websocket.send(JSON.stringify(update));
+	  }
+	}
+	requestAnimationFrame(this.processInput);
   };
 
   createGameObjects() {
