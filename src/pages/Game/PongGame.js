@@ -377,60 +377,76 @@ export class PongGame {
   }
 
   handleGameEnd({ winner, match }) {
-    this.isStarted = false;
-
-    // 게임 오브젝트 초기화
-    this.objects.ball.position.set(0, 0.2, 0);
-    this.objects.playerPaddle.position.set(0, 0.1, 7);
-    this.objects.opponentPaddle.position.set(0, 0.1, -7);
-
-    // 승자 스코어 업데이트
-    const winnerScore = winner === 'player1' ? 'player1' : 'player2';
-    this.states.score[winnerScore]++;
-    this.updateScore(this.states.score);
-
-    // 결승전(3)이나 3,4위전(4)인 경우 순위 표시
-    let winnerText;
-    if (match === '3' || match === '0') {
-        // 결승전
-        winnerText = this.playerNumber === winner ? '🏆 Champion!' : '2nd Place';
-    } else if (match === '4') {
-        // 3,4위전
-        winnerText = this.playerNumber === winner ? '3rd Place' : '4th Place';
-    } else {
-        // 일반 게임
-        winnerText = `${winner === 'player1' ? 'Player 1' : 'Player 2'} Wins!`;
-    }
-
-    this.updateTextSprite('winner', winnerText, 64);
-    this.textObjects.winner.visible = true;
-    this.fadeInText(this.textObjects.winner);
-
-    // 카운트다운 시작
-    let countdown = 3;
-    const countdownInterval = setInterval(() => {
-      countdown--;
-      if (countdown > 0) {
-        this.updateTextSprite('subText', `Returning to lobby in ${countdown}...`, 36);
-        this.textObjects.subText.visible = true;
-      } else {
-        clearInterval(countdownInterval);
-        this.fadeOutText(this.textObjects.winner);
-        this.fadeOutText(this.textObjects.subText, () => {
-          if (winner !== this.playerNumber) {
-            window.location.replace('/lobby');
-            return;
-          }
-
-          // 매치가 1 or 2가 아닌 경우는 로비로 이동
-		  // 매치가 1 or 2인 경우는 다음 매치로 이동
-		  // 매치가 1 or 2인 경우에는 join api 호출
-		  // final match인 경우는 room_id는 roomId + '_final'로 설정
-		  // 3, 4위전인 경우는 room_id는 roomId + '_3rd'로 설정
-        });
-      }
-    }, 1000);
-}
+	this.isStarted = false;
+ 
+	// 게임 오브젝트 초기화
+	this.objects.ball.position.set(0, 0.2, 0);
+	this.objects.playerPaddle.position.set(0, 0.1, 7);
+	this.objects.opponentPaddle.position.set(0, 0.1, -7);
+ 
+	// 승자 스코어 업데이트
+	const winnerScore = winner === 'player1' ? 'player1' : 'player2';
+	this.states.score[winnerScore]++;
+	this.updateScore(this.states.score);
+ 
+	// 결승전(3)이나 3,4위전(4)인 경우 순위 표시
+	let winnerText;
+	if (match === '3' || match === '0') {
+		// 결승전일 때 각 플레이어의 화면에 맞는 텍스트 표시
+		winnerText = winner === this.playerNumber ? '🏆 Champion!' : '2nd Place';
+	} else if (match === '4') {
+		// 3,4위전일 때 각 플레이어의 화면에 맞는 텍스트 표시
+		winnerText = winner === this.playerNumber ? '3rd Place' : '4th Place';
+	} else {
+		// 일반 게임일 때 승/패 표시
+		winnerText = winner === this.playerNumber ? 'You Win!' : 'You Lose!';
+	}
+ 
+	// 텍스트 업데이트 및 표시
+	this.updateTextSprite('winner', winnerText, 64);
+	this.textObjects.winner.visible = true;
+	this.fadeInText(this.textObjects.winner);
+ 
+	// 카운트다운 시작
+	let countdown = 3;
+	const countdownInterval = setInterval(() => {
+		countdown--;
+		if (countdown > 0) {
+			this.updateTextSprite('subText', `Returning to lobby in ${countdown}...`, 36);
+			this.textObjects.subText.visible = true;
+		} else {
+			clearInterval(countdownInterval);
+			this.fadeOutText(this.textObjects.winner);
+			this.fadeOutText(this.textObjects.subText, () => {
+				if (winner !== this.playerNumber) {
+					window.location.replace('/lobby');
+					return;
+				}
+				
+				// 매치가 1 or 2인 경우(토너먼트 첫 라운드)
+				if (match === '1' || match === '2') {
+					// 결승전으로 이동
+					const roomId = window.location.pathname.split('/')[2];
+					const nextMatchRoomId = `${roomId}_final`;
+					window.location.replace(`/game/${nextMatchRoomId}`);
+					return;
+				}
+ 
+				// 첫 라운드에서 진 경우(토너먼트 첫 라운드 패배자)
+				if (match === '0') {
+					// 3,4위전으로 이동
+					const roomId = window.location.pathname.split('/')[2];
+					const nextMatchRoomId = `${roomId}_3rd`;
+					window.location.replace(`/game/${nextMatchRoomId}`);
+					return;
+				}
+ 
+				// 그 외의 경우(결승전 or 3,4위전이 끝난 경우)
+				window.location.replace('/lobby');
+			});
+		}
+	}, 1000);
+ }
 
 dispose() {
     // Update event listener cleanup
