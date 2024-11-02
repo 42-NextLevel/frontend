@@ -502,8 +502,10 @@ dispose() {
 
   updateGameState({ ball, score }) {
     this.updateBallState(ball);
-    this.states.score = score;
-    this.updateScore(score);
+    if (score !== undefined) {
+      this.states.score = score;
+      this.updateScore(score);
+    }
   }
 
   updateBallState(ballData) {
