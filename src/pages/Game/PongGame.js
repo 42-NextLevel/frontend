@@ -398,13 +398,13 @@ export class PongGame {
 	let winnerText;
 	if (match === '3') {
 		// 결승전일 때 각 플레이어의 화면에 맞는 텍스트 표시
-		winnerText = winner === this.playerNumber ?  '2nd Place' : '🏆 Champion!';
+		winnerText = winner === this.playerNumber ?  '🏆 Champion!' : '2nd Place';
 	} else if (match === '4') {
 		// 3,4위전일 때 각 플레이어의 화면에 맞는 텍스트 표시
-		winnerText = winner === this.playerNumber ? '4th Place' : '3rd Place';
+		winnerText = winner === this.playerNumber ?  '3rd Place' : '4th Place';
 	} else if (match === '0' || match === '1' || match === '2') {
 		// 일반 게임일 때 승/패 표시
-		winnerText = winner === this.playerNumber ? 'You Lose!' : 'You Win!';
+		winnerText = winner === this.playerNumber ?  'You Win!' : 'You Lose';
 	}
  
 	// 텍스트 업데이트 및 표시
