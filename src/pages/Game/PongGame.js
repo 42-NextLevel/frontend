@@ -7,7 +7,6 @@ const LERP_FACTOR = {
 
 const PADDLE_SPEED = 0.2; // Paddle movement speed
 
-
 export class PongGame {
   websocket = null;
   keys = { left: false, right: false };
@@ -83,44 +82,47 @@ export class PongGame {
   };
 
   processInput = () => {
-	if (
-	  this.isStarted &&
-	  this.playerNumber &&
-	  this.websocket?.readyState === WebSocket.OPEN
-	) {
-	  let currentX = this.states.paddle.players[this.playerNumber].position.x;
-	  
-	  if (this.keys.left) currentX -= PADDLE_SPEED;
-	  if (this.keys.right) currentX += PADDLE_SPEED;
-	  
-	  // Clamp paddle position to table bounds (-4 to 4)
-	  currentX = Math.max(-4, Math.min(4, currentX));
- 
-	  // 위치값 반올림 (소수점 3자리)
-	  currentX = Math.round(currentX * 1000) / 1000;
-	  const lastPosition = Math.round(this.states.paddle.players[this.playerNumber].position.x * 1000) / 1000;
- 
-	  // 의미있는 위치 변화가 있는 경우만 업데이트
-	  if (Math.abs(currentX - lastPosition) >= 0.001) {
-		const input = {
-		  inputSequence: this.inputSequence++,
-		  pressTime: Date.now(),
-		  x: currentX,
-		};
- 
-		this.states.paddle.players[this.playerNumber].position.x = input.x;
- 
-		const update = {
-		  type: 'client_state_update',
-		  player: this.playerNumber,
-		  position: { x: input.x },
-		  input_sequence: input.inputSequence,
-		  timestamp: Date.now(),
-		};
-		this.websocket.send(JSON.stringify(update));
-	  }
-	}
-	requestAnimationFrame(this.processInput);
+    if (
+      this.isStarted &&
+      this.playerNumber &&
+      this.websocket?.readyState === WebSocket.OPEN
+    ) {
+      let currentX = this.states.paddle.players[this.playerNumber].position.x;
+
+      if (this.keys.left) currentX -= PADDLE_SPEED;
+      if (this.keys.right) currentX += PADDLE_SPEED;
+
+      // Clamp paddle position to table bounds (-4 to 4)
+      currentX = Math.max(-4, Math.min(4, currentX));
+
+      // 위치값 반올림 (소수점 3자리)
+      currentX = Math.round(currentX * 1000) / 1000;
+      const lastPosition =
+        Math.round(
+          this.states.paddle.players[this.playerNumber].position.x * 1000,
+        ) / 1000;
+
+      // 의미있는 위치 변화가 있는 경우만 업데이트
+      if (Math.abs(currentX - lastPosition) >= 0.001) {
+        const input = {
+          inputSequence: this.inputSequence++,
+          pressTime: Date.now(),
+          x: currentX,
+        };
+
+        this.states.paddle.players[this.playerNumber].position.x = input.x;
+
+        const update = {
+          type: 'client_state_update',
+          player: this.playerNumber,
+          position: { x: input.x },
+          input_sequence: input.inputSequence,
+          timestamp: Date.now(),
+        };
+        this.websocket.send(JSON.stringify(update));
+      }
+    }
+    requestAnimationFrame(this.processInput);
   };
 
   createGameObjects() {
@@ -382,78 +384,82 @@ export class PongGame {
   }
 
   handleGameEnd({ winner, match }) {
-	this.isStarted = false;
- 
-	// 게임 오브젝트 초기화
-	this.objects.ball.position.set(0, 0.2, 0);
-	this.objects.playerPaddle.position.set(0, 0.1, 7);
-	this.objects.opponentPaddle.position.set(0, 0.1, -7);
- 
-	// 승자 스코어 업데이트
-	const winnerScore = winner === 'player1' ? 'player1' : 'player2';
-	this.states.score[winnerScore]++;
-	this.updateScore(this.states.score);
- 
-	// 결승전(3)이나 3,4위전(4)인 경우 순위 표시
-	let winnerText;
-	if (match === '3') {
-		// 결승전일 때 각 플레이어의 화면에 맞는 텍스트 표시
-		winnerText = winner === this.playerNumber ?  '🏆 Champion!' : '2nd Place';
-	} else if (match === '4') {
-		// 3,4위전일 때 각 플레이어의 화면에 맞는 텍스트 표시
-		winnerText = winner === this.playerNumber ?  '3rd Place' : '4th Place';
-	} else if (match === '0' || match === '1' || match === '2') {
-		// 일반 게임일 때 승/패 표시
-		winnerText = winner === this.playerNumber ?  'You Win!' : 'You Lose';
-	}
- 
-	// 텍스트 업데이트 및 표시
-	this.updateTextSprite('winner', winnerText, 64);
-	this.textObjects.winner.visible = true;
-	this.fadeInText(this.textObjects.winner);
- 
-	// 카운트다운 시작
-	let countdown = 3;
-	const countdownInterval = setInterval(() => {
-		countdown--;
-		if (countdown > 0) {
-			this.updateTextSprite('subText', `Returning to lobby in ${countdown}...`, 36);
-			this.textObjects.subText.visible = true;
-		} else {
-			clearInterval(countdownInterval);
-			this.fadeOutText(this.textObjects.winner);
-			this.fadeOutText(this.textObjects.subText, () => {
-				if (winner !== this.playerNumber) {
-					window.location.replace('/lobby');
-					return;
-				}
-				
-				// 매치가 1 or 2인 경우(토너먼트 첫 라운드)
-				if (match === '1' || match === '2') {
-					// 결승전으로 이동
-					const roomId = window.location.pathname.split('/')[2];
-					const nextMatchRoomId = `${roomId}_final`;
-					window.location.replace(`/game/${nextMatchRoomId}`);
-					return;
-				}
- 
-				// 첫 라운드에서 진 경우(토너먼트 첫 라운드 패배자)
-				if (match === '0') {
-					// 3,4위전으로 이동
-					const roomId = window.location.pathname.split('/')[2];
-					const nextMatchRoomId = `${roomId}_3rd`;
-					window.location.replace(`/game/${nextMatchRoomId}`);
-					return;
-				}
- 
-				// 그 외의 경우(결승전 or 3,4위전이 끝난 경우)
-				window.location.replace('/lobby');
-			});
-		}
-	}, 1000);
- }
+    this.isStarted = false;
 
-dispose() {
+    // 게임 오브젝트 초기화
+    this.objects.ball.position.set(0, 0.2, 0);
+    this.objects.playerPaddle.position.set(0, 0.1, 7);
+    this.objects.opponentPaddle.position.set(0, 0.1, -7);
+
+    // 승자 스코어 업데이트
+    const winnerScore = winner === 'player1' ? 'player1' : 'player2';
+    this.states.score[winnerScore]++;
+    this.updateScore(this.states.score);
+
+    // 결승전(3)이나 3,4위전(4)인 경우 순위 표시
+    let winnerText;
+    if (match === '3') {
+      // 결승전일 때 각 플레이어의 화면에 맞는 텍스트 표시
+      winnerText = winner === this.playerNumber ? '🏆 Champion!' : '2nd Place';
+    } else if (match === '4') {
+      // 3,4위전일 때 각 플레이어의 화면에 맞는 텍스트 표시
+      winnerText = winner === this.playerNumber ? '3rd Place' : '4th Place';
+    } else if (match === '0' || match === '1' || match === '2') {
+      // 일반 게임일 때 승/패 표시
+      winnerText = winner === this.playerNumber ? 'You Win!' : 'You Lose';
+    }
+
+    // 텍스트 업데이트 및 표시
+    this.updateTextSprite('winner', winnerText, 64);
+    this.textObjects.winner.visible = true;
+    this.fadeInText(this.textObjects.winner);
+
+    // 카운트다운 시작
+    let countdown = 3;
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown > 0) {
+        this.updateTextSprite(
+          'subText',
+          `Returning to lobby in ${countdown}...`,
+          36,
+        );
+        this.textObjects.subText.visible = true;
+      } else {
+        clearInterval(countdownInterval);
+        this.fadeOutText(this.textObjects.winner);
+        this.fadeOutText(this.textObjects.subText, () => {
+          if (winner !== this.playerNumber) {
+            window.location.replace('/lobby');
+            return;
+          }
+
+          // 매치가 1 or 2인 경우(토너먼트 첫 라운드)
+          if (match === '1' || match === '2') {
+            // 결승전으로 이동
+            const roomId = window.location.pathname.split('/')[2];
+            const nextMatchRoomId = `${roomId}_final`;
+            window.location.replace(`/game/${nextMatchRoomId}`);
+            return;
+          }
+
+          // 첫 라운드에서 진 경우(토너먼트 첫 라운드 패배자)
+          if (match === '0') {
+            // 3,4위전으로 이동
+            const roomId = window.location.pathname.split('/')[2];
+            const nextMatchRoomId = `${roomId}_3rd`;
+            window.location.replace(`/game/${nextMatchRoomId}`);
+            return;
+          }
+
+          // 그 외의 경우(결승전 or 3,4위전이 끝난 경우)
+          window.location.replace('/lobby');
+        });
+      }
+    }, 1000);
+  }
+
+  dispose() {
     // Update event listener cleanup
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('keyup', this.onKeyUp);
@@ -483,7 +489,6 @@ dispose() {
     this.renderer.dispose();
   }
 
-
   setGameStarted() {
     this.isStarted = true;
   }
@@ -510,42 +515,44 @@ dispose() {
 
   updateBallState(ballData) {
     if (!ballData) {
-        return;
+      return;
     }
 
     // 현재 위치와 새로운 위치의 거리가 큰 경우 (리셋되는 경우) 즉시 이동
     const currentPos = this.objects.ball.position;
     const newPos = new THREE.Vector3(
-        ballData.position.x,
-        ballData.position.y,
-        ballData.position.z
+      ballData.position.x,
+      ballData.position.y,
+      ballData.position.z,
     );
-    
+
     // 중앙 위치({x: 0, y: 0.2, z: 0})로 이동하는 경우 즉시 이동
-    if (ballData.position.x === 0 && 
-        ballData.position.y === 0.2 && 
-        ballData.position.z === 0) {
-        this.objects.ball.position.copy(newPos);
+    if (
+      ballData.position.x === 0 &&
+      ballData.position.y === 0.2 &&
+      ballData.position.z === 0
+    ) {
+      this.objects.ball.position.copy(newPos);
     }
 
     // 공 상태 업데이트
     this.states.ball = {
-        position: {
-            x: ballData.position.x,
-            y: ballData.position.y,
-            z: ballData.position.z,
-        },
-        velocity: {
-            x: ballData.velocity.x,
-            y: ballData.velocity.y,
-            z: ballData.velocity.z,
-        },
-        timestamp: ballData.timestamp,
+      position: {
+        x: ballData.position.x,
+        y: ballData.position.y,
+        z: ballData.position.z,
+      },
+      velocity: {
+        x: ballData.velocity.x,
+        y: ballData.velocity.y,
+        z: ballData.velocity.z,
+      },
+      timestamp: ballData.timestamp,
     };
 
     // 일반적인 게임 오브젝트 업데이트 (보간 적용)
     this.updateGameObjects();
-}
+  }
 
   updateGameObjects() {
     if (!this.playerNumber) {
