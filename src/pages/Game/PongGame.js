@@ -192,11 +192,6 @@ export class PongGame {
         const clientTime = Date.now();
         const serverTimestamp = data.server_timestamp; // 서버에서 보낸 타임스탬프
         this.serverTimeDiff = serverTimestamp - clientTime;
-        console.log('Time sync:', {
-          clientTime,
-          serverTime: serverTimestamp,
-          diff: this.serverTimeDiff,
-        });
         break;
       case 'game_start':
         return this.setGameStarted();
