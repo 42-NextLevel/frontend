@@ -5,8 +5,6 @@ const LERP_FACTOR = {
   paddle: 0.5,
 };
 
-const PADDLE_SPEED = 0.2; // Paddle movement speed
-
 export class PongGame {
   websocket = null;
   keys = { left: false, right: false };
@@ -76,8 +74,14 @@ export class PongGame {
     this.camera.position.set(0, 7, 10);
     this.camera.lookAt(0, 0, 0);
     this.updateScore = setScore;
+	this.serverTimeDiff = 0;
+    this.lastProcessedTime = null;
 
     this.processInput();
+  }
+
+  getServerTime() {
+    return Date.now() + this.serverTimeDiff;
   }
 
   onKeyDown = (event) => {
@@ -96,43 +100,62 @@ export class PongGame {
       this.playerNumber &&
       this.websocket?.readyState === WebSocket.OPEN
     ) {
+      const currentServerTime = this.getServerTime();
+      
+      // 첫 실행이거나 서버 시간이 아직 동기화되지 않은 경우
+      if (!this.lastProcessedTime) {
+        this.lastProcessedTime = currentServerTime;
+        requestAnimationFrame(this.processInput);
+        return;
+      }
+
+      // 서버 시간 기준으로 deltaTime 계산
+      const deltaTime = (currentServerTime - this.lastProcessedTime) / 1000;  // 초 단위로 변환
+      this.lastProcessedTime = currentServerTime;
+
+      // 기본 속도를 초당 단위로 정의
+      const BASE_SPEED = 4; // 초당 4 유닛 이동
+      
       let currentX = this.states.paddle.players[this.playerNumber].position.x;
-
-      if (this.keys.left) currentX -= PADDLE_SPEED;
-      if (this.keys.right) currentX += PADDLE_SPEED;
-
-      // Clamp paddle position to table bounds (-4 to 4)
+      
+      // 서버 시간 기준 이동 거리 계산
+      if (this.keys.left) currentX -= BASE_SPEED * deltaTime;
+      if (this.keys.right) currentX += BASE_SPEED * deltaTime;
+      
+      // Clamp paddle position
       currentX = Math.max(-4, Math.min(4, currentX));
-
-      // 위치값 반올림 (소수점 3자리)
+      
+      // 위치값 반올림 (서버와 동일한 정밀도 유지)
       currentX = Math.round(currentX * 1000) / 1000;
-      const lastPosition =
-        Math.round(
-          this.states.paddle.players[this.playerNumber].position.x * 1000,
-        ) / 1000;
-
+      const lastPosition = Math.round(
+        this.states.paddle.players[this.playerNumber].position.x * 1000
+      ) / 1000;
+      
       // 의미있는 위치 변화가 있는 경우만 업데이트
       if (Math.abs(currentX - lastPosition) >= 0.001) {
+        const serverTimestamp = this.getServerTime();
+        
         const input = {
           inputSequence: this.inputSequence++,
-          pressTime: Date.now(),
+          pressTime: serverTimestamp,  // 서버 시간 기준으로 변경
           x: currentX,
         };
-
+        
         this.states.paddle.players[this.playerNumber].position.x = input.x;
-
+        
         const update = {
           type: 'client_state_update',
           player: this.playerNumber,
           position: { x: input.x },
           input_sequence: input.inputSequence,
-          timestamp: Date.now(),
+          timestamp: serverTimestamp,  // 서버 시간 기준으로 변경
         };
         this.websocket.send(JSON.stringify(update));
       }
     }
     requestAnimationFrame(this.processInput);
   };
+
 
   createGameObjects() {
     // Ball
