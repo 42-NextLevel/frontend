@@ -1,6 +1,10 @@
 import { PongGame } from './PongGame.js';
 import { useEffect, useState } from '@/library/hooks.js';
-import { useLoaderData, useParams } from '@/library/router/hooks.js';
+import {
+  useLoaderData,
+  useNavigate,
+  useParams,
+} from '@/library/router/hooks.js';
 
 const Game = () => {
   const elementId = 'game';
@@ -8,10 +12,20 @@ const Game = () => {
   const { roomId } = useParams();
   const { nickname } = players.find((player) => player.intraId === intraId);
   const [score, setScore] = useState({ player1: 0, player2: 0 });
-  const connectionURI = `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/game/${roomId}_${matchType}?nickname=${nickname}&intraId=${intraId}`;
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const pongGame = new PongGame(elementId, connectionURI, setScore);
+    const pongGame = new PongGame(
+      {
+        elementId,
+        roomId,
+        matchType,
+        intraId,
+        nickname,
+      },
+      setScore,
+      navigate,
+    );
     pongGame.animate();
 
     return () => {

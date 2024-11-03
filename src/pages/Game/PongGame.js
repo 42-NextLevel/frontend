@@ -11,7 +11,16 @@ export class PongGame {
   websocket = null;
   keys = { left: false, right: false };
 
-  constructor(elementId, webSocketConnectionURI, setScore) {
+  constructor(
+    { elementId, roomId, matchType, intraId, nickname },
+    setScore,
+    navigate,
+  ) {
+    this.roomId = roomId;
+    this.navigate = (path, options) => {
+      this.dispose();
+      navigate(path, options);
+    };
     this.objects = {
       ball: null,
       playerPaddle: null,
@@ -62,7 +71,9 @@ export class PongGame {
     document.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('keyup', this.onKeyUp);
     window.addEventListener('resize', this.onWindowResize);
-    this.initWebSocket(webSocketConnectionURI);
+    this.initWebSocket(
+      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/game/${roomId}_${matchType}?nickname=${nickname}&intraId=${intraId}`,
+    );
 
     this.camera.position.set(0, 7, 10);
     this.camera.lookAt(0, 0, 0);
@@ -429,31 +440,9 @@ export class PongGame {
         clearInterval(countdownInterval);
         this.fadeOutText(this.textObjects.winner);
         this.fadeOutText(this.textObjects.subText, () => {
-          if (winner !== this.playerNumber) {
-            window.location.replace('/lobby');
-            return;
-          }
-
-          // 매치가 1 or 2인 경우(토너먼트 첫 라운드)
-          if (match === '1' || match === '2') {
-            // 결승전으로 이동
-            const roomId = window.location.pathname.split('/')[2];
-            const nextMatchRoomId = `${roomId}_final`;
-            window.location.replace(`/game/${nextMatchRoomId}`);
-            return;
-          }
-
-          // 첫 라운드에서 진 경우(토너먼트 첫 라운드 패배자)
-          if (match === '0') {
-            // 3,4위전으로 이동
-            const roomId = window.location.pathname.split('/')[2];
-            const nextMatchRoomId = `${roomId}_3rd`;
-            window.location.replace(`/game/${nextMatchRoomId}`);
-            return;
-          }
-
-          // 그 외의 경우(결승전 or 3,4위전이 끝난 경우)
-          window.location.replace('/lobby');
+          const { message, path } = this.getResult(winner, match);
+          alert(message);
+          return this.navigate(path, { replace: true });
         });
       }
     }, 1000);
@@ -611,5 +600,30 @@ export class PongGame {
       this.updateGameObjects();
     }
     this.renderer.render(this.scene, this.camera);
+  };
+
+  getResult = (winner, match) => {
+    const isWinner = winner === this.playerNumber;
+    if (match === '1' || match === '2') {
+      if (isWinner) {
+        return {
+          message: '게임에서 승리했습니다. 결승전으로 이동합니다.',
+          path: `/room/${this.roomId}_final`,
+        };
+      }
+      return {
+        message: '게임에서 패배했습니다. 3,4위전으로 이동합니다.',
+        path: `/room/${this.roomId}_3rd`,
+      };
+    }
+    let result = isWinner ? '게임에서 승리했습니다.' : '게임에서 패배했습니다.';
+    let rank = isWinner ? 1 : 2;
+    if (match === '4') {
+      rank += 2;
+    }
+    return {
+      message: `${result} (${rank}위)`,
+      path: '/lobby',
+    };
   };
 }
