@@ -19,6 +19,7 @@ export class PongGame {
     this.roomId = roomId;
     this.navigate = (path, options) => {
       this.dispose();
+      document.getElementById(elementId).removeChild(this.renderer.domElement);
       navigate(path, options);
     };
     this.objects = {
@@ -453,10 +454,8 @@ export class PongGame {
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('resize', this.onWindowResize);
-
-    if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
-      this.websocket.close();
-    }
+    window.cancelAnimationFrame(this.animationFrameId);
+    this.websocket?.close();
 
     Object.values(this.textObjects).forEach((sprite) => {
       if (sprite) {
@@ -595,7 +594,7 @@ export class PongGame {
   }
 
   animate = () => {
-    window.requestAnimationFrame(this.animate);
+    this.animationFrameId = window.requestAnimationFrame(this.animate);
     if (this.isStarted) {
       this.updateGameObjects();
     }
