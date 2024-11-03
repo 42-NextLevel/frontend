@@ -17,11 +17,8 @@ export class PongGame {
     navigate,
   ) {
     this.roomId = roomId;
-    this.navigate = (path, options) => {
-      this.dispose();
-      document.getElementById(elementId).removeChild(this.renderer.domElement);
-      navigate(path, options);
-    };
+    this.elementId = elementId;
+    this.navigate = navigate;
     this.objects = {
       ball: null,
       playerPaddle: null,
@@ -470,6 +467,7 @@ export class PongGame {
     });
 
     this.renderer.dispose();
+    document.getElementById(this.elementId).removeChild(this.renderer.domElement);
   }
 
   setGameStarted() {

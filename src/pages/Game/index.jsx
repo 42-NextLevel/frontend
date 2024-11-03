@@ -29,7 +29,7 @@ const Game = () => {
     pongGame.animate();
 
     return () => {
-      pongGame.websocket.close();
+      pongGame.dispose();
     };
   }, []);
 
