@@ -495,7 +495,7 @@ export class PongGame {
 
   updateGameState({ ball, score }) {
     this.updateBallState(ball);
-    if (score !== undefined) {
+    if (score && (score.player1 != this.states.score.player1 || score.player2 != this.states.score.player2)) {
       this.states.score = score;
       this.updateScore(score);
     }
