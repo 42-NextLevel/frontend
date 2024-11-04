@@ -114,7 +114,7 @@ export class PongGame {
       this.lastProcessedTime = currentServerTime;
 
       // 기본 속도를 초당 단위로 정의
-      const BASE_SPEED = 4; // 초당 4 유닛 이동
+      const BASE_SPEED = 8; // 초당 4 유닛 이동
       
       let currentX = this.states.paddle.players[this.playerNumber].position.x;
       
