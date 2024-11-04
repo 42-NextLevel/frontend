@@ -8,6 +8,7 @@ import Game from '@/pages/Game';
 
 import { getUserInfo } from './services/room.js';
 import { getPlayersInfo } from './services/game.js';
+import { lobbyLoader } from './pages/Lobby/lobby.loader.jsx';
 
 export const routes = [
   {
@@ -34,6 +35,7 @@ export const routes = [
   {
     path: '/lobby',
     element: Lobby,
+    loader: lobbyLoader,
   },
   {
     path: '/room/:roomId',

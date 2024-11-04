@@ -2,46 +2,20 @@ import Profile from '@/components/Profile/index';
 import RoomCard from './components/RoomCard';
 import AddRoundIcon from '/images/add-round.svg';
 import RefreshIcon from '/images/refresh.svg';
-import { getRoomList } from '../../services/game';
-import { getUserProfile } from '../../services/user';
-import { useEffect, useState } from '@/library/hooks.js';
+import { useState } from '@/library/hooks.js';
 import ModalTrigger from '@/components/ModalTrigger';
 import JoinModal from './components/JoinModal';
 import CreateModal from './components/CreateModal';
+import { useLoaderData, useNavigate } from '@/library/router/hooks.js';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
 
 const Lobby = () => {
-  const [roomList, setRoomList] = useState([]);
-  const [userProfile, setUserProfile] = useState();
+  const { roomList, userProfile } = useLoaderData();
   const [page, setPage] = useState(1);
   const [isThrottle, setIsThrottle] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState({ name: '', id: '' });
-
-  const fetchRoomList = async () => {
-    const response = [...(await getRoomList())];
-    // const response = [...(await getTestRoomList())];
-    const slicedResponse = [];
-
-    for (let i = 0; i < response.length; i += 4) {
-      const chunk = response.slice(i, i + 4);
-      slicedResponse.push(chunk);
-    }
-
-    setRoomList(slicedResponse);
-    setPage(1);
-  };
-
-  const fetchUserProfile = async () => {
-    const response = await getUserProfile();
-    // const response = await getTestUserProfile();
-    setUserProfile(response);
-  };
-
-  useEffect(() => {
-    fetchRoomList();
-    fetchUserProfile();
-  }, []);
+  const navigate = useNavigate();
 
   const handleWheel = (event) => {
     if (!isThrottle) {
@@ -79,7 +53,9 @@ const Lobby = () => {
               </ModalTrigger>
               <button
                 className='btn btn-primary p-2 rounded-3'
-                onClick={fetchRoomList}
+                onClick={() => {
+                  navigate('/lobby', { replace: true });
+                }}
               >
                 <img src={RefreshIcon} alt='refresh-icon' />
               </button>
