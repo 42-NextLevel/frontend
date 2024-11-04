@@ -14,6 +14,38 @@ const setAccessToken = () => {
     return config;
   });
 
+  axiosInstance.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    async (error) => {
+      const originalRequest = error.config;
+
+      // 토큰 만료로 인한 403 에러 && 재시도하지 않은 요청
+      if (error.response.status === 403 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          const response = await axios.post('/api/auth/token');
+
+          const { accessToken: newToken } = response.data;
+
+          localStorage.setItem('access_token', newToken);
+
+          // 새로운 토큰으로 원래 요청 재시도
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return axios(originalRequest);
+        } catch (error) {
+          localStorage.removeItem('access_token');
+          window.location.href = '/';
+          return Promise.reject(error);
+        }
+      }
+
+      return Promise.reject(error);
+    },
+  );
+
   return axiosInstance;
 };
 
