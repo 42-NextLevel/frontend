@@ -41,3 +41,7 @@ export const getUserInfo = () => {
 export const getPlayersInfo = (roomId) => {
   return service.post('/game/players', { roomId }).then((res) => res.data);
 };
+
+export const getGameHistory = () => {
+  return service.get('/game/history').then((res) => res.data);
+};
