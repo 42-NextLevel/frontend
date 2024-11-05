@@ -4,44 +4,51 @@ import { useState } from '@/library/hooks.js';
 import { postMakeRoom } from '@/services/game';
 import { useNavigate } from '@/library/router/hooks.js';
 
+const initialRoomState = {
+  name: '',
+  nickname: '',
+  roomType: 0,
+};
+
 const CreateModal = ({ id }) => {
-  const [roomName, setRoomName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [mode, setMode] = useState(0);
+  const [room, setRoom] = useState(initialRoomState);
   const navigate = useNavigate();
+  const isTournament = room.roomType === 1;
 
   const makeRoom = async () => {
-    postMakeRoom({
-      name: roomName,
-      nickname: nickname,
-      roomType: mode,
-    }).then(({ roomId }) => {
+    postMakeRoom(room).then(({ roomId }) => {
       navigate(`/room/${roomId}`);
     });
   };
 
   const resetInput = () => {
-    setRoomName('');
-    setNickname('');
-    setMode(0);
-  }
+    setRoom(initialRoomState);
+  };
 
   return (
-    <Modal id={id} onClick={makeRoom} onClose={resetInput} title='방만들기' btnText='만들기'>
+    <Modal
+      id={id}
+      onClick={makeRoom}
+      onClose={resetInput}
+      title='방만들기'
+      btnText='만들기'
+    >
       <Input
         label='방제목'
         type='text'
         placeholder='방 제목을 입력해주세요'
-        value={roomName}
-        onChange={(e) => setRoomName(e.target.value)}
+        value={room.name}
+        onChange={(e) => setRoom((prev) => ({ ...prev, name: e.target.value }))}
       />
 
       <Input
         label='닉네임'
         type='text'
         placeholder='참가 닉네임을 입력해주세요'
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
+        value={room.nickname}
+        onChange={(e) =>
+          setRoom((prev) => ({ ...prev, nickname: e.target.value }))
+        }
       />
       <div>
         <label className='form-label mt-3'>모드</label>
@@ -56,8 +63,8 @@ const CreateModal = ({ id }) => {
           className='btn-check'
           name='btnradio'
           id='1v1'
-          checked={mode === 0}
-          onChange={() => setMode(0)}
+          checked={!isTournament}
+          onChange={() => setRoom((prev) => ({ ...prev, roomType: 0 }))}
         />
         <label className='btn btn-outline-primary' htmlFor='1v1'>
           개인전
@@ -68,8 +75,8 @@ const CreateModal = ({ id }) => {
           className='btn-check'
           name='btnradio'
           id='tournament'
-          checked={mode === 1}
-          onChange={() => setMode(1)}
+          checked={isTournament}
+          onChange={() => setRoom((prev) => ({ ...prev, roomType: 1 }))}
         />
         <label className='btn btn-outline-primary' htmlFor='tournament'>
           토너먼트
