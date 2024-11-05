@@ -68,7 +68,7 @@ class VirtualDOM {
       if (!deps || isDepsChanged(deps, this.effects.deps[index])) {
         const cleanUp = callback();
         if (typeof cleanUp === 'function') {
-          this.effects.cleanUps.push(cleanUp);
+          this.effects.cleanUps[index] = cleanUp;
         }
         this.effects.deps[index] = deps;
       }
@@ -76,7 +76,6 @@ class VirtualDOM {
   }
 
   runEffects() {
-    this.effects.cleanUps = [];
     this.effects.store.forEach((effect) => effect());
   }
 
