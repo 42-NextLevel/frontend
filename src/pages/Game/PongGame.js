@@ -9,14 +9,20 @@ export class PongGame {
   websocket = null;
   keys = { left: false, right: false };
 
-  constructor(
-    { elementId, roomId, matchType, intraId, nickname },
+  constructor({
+    elementId,
+    roomId,
+    matchType,
+    intraId,
+    nickname,
     setScore,
     navigate,
-  ) {
+    setProfile,
+  }) {
     this.roomId = roomId;
     this.elementId = elementId;
     this.navigate = navigate;
+    this.setProfile = setProfile;
     this.objects = {
       ball: null,
       playerPaddle: null,
@@ -500,7 +506,10 @@ export class PongGame {
   }
 
   setPlayerNumber({ player_number }) {
-    this.playerNumber = player_number;
+    if (!this.playerNumber) {
+      this.playerNumber = player_number;
+      this.setProfile(player_number);
+    }
   }
 
   updateOpponentPaddle({ player, position, input_sequence }) {
