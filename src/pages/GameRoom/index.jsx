@@ -22,7 +22,7 @@ const GameRoom = () => {
 
   useEffect(() => {
     const websocket = new WebSocket(
-      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intra_id}`,
+      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intraId=${intra_id}`,
     );
     websocket.onerror = () => {
       alert('입장 실패');
