@@ -64,7 +64,7 @@ const GameRoom = () => {
           </li>
         ))}
       </ul>
-      <Button disabled={room.host === intra_id} onClick={handleClick}>
+      <Button disabled={room.host !== nickname} onClick={handleClick}>
         게임 시작
       </Button>
       <h5 className='mt-5'>🏓 게임 규칙</h5>
