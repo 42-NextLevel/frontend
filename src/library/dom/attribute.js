@@ -13,6 +13,9 @@ export const updateAttributes = (target, newProps, oldProps) => {
     if (oldProps[attr] === newProps[attr]) {
       return;
     }
+    if (!value) {
+      return target.removeAttribute(convertAttribute(attr));
+    }
     setAttribute(target, attr, value);
   });
 };
