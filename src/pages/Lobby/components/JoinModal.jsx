@@ -23,7 +23,7 @@ const JoinModal = ({ id, room }) => {
 
   const resetInput = () => {
     setNickname('');
-  }
+  };
 
   return (
     <Modal
@@ -37,6 +37,7 @@ const JoinModal = ({ id, room }) => {
         label='닉네임'
         type='text'
         placeholder='참가 닉네임을 입력해주세요'
+        value={nickname}
         onChange={(e) => setNickname(e.target.value)}
       />
     </Modal>

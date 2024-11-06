@@ -13,12 +13,21 @@ export const updateAttributes = (target, newProps, oldProps) => {
     if (oldProps[attr] === newProps[attr]) {
       return;
     }
+    if (attr === 'value') {
+      if (isFormElement(target)) {
+        target.value = value ?? '';
+      }
+      return;
+    }
     if (!value) {
       return target.removeAttribute(convertAttribute(attr));
     }
     setAttribute(target, attr, value);
   });
 };
+
+const isFormElement = (element) =>
+  ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName);
 
 const isEventAttribute = (attribute, value) =>
   attribute.startsWith('on') && typeof value === 'function';

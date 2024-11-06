@@ -34,6 +34,7 @@ const AuthMail = () => {
           placeholder='이메일을 입력해주세요'
           type='email'
           label='Email'
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         {!isValidEmail && (

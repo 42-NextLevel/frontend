@@ -1,4 +1,4 @@
-const Input = ({ placeholder, onChange, label, type = 'text' }) => {
+const Input = ({ placeholder, onChange, label, value, type = 'text' }) => {
   return (
     <>
       {label && (
@@ -12,6 +12,7 @@ const Input = ({ placeholder, onChange, label, type = 'text' }) => {
         className='form-control form-control-lg fs-6'
         placeholder={placeholder}
         onChange={onChange}
+        value={value}
       />
     </>
   );
