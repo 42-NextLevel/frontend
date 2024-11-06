@@ -8,7 +8,6 @@ import JoinModal from './components/JoinModal';
 import CreateModal from './components/CreateModal';
 import { useLoaderData } from '@/library/router/hooks.js';
 import { getRoomList } from '@/services/game';
-import { sliceRoomList } from '@/util/sliceRoomList';
 import { logout } from '@/services/user';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
@@ -74,7 +73,7 @@ const Lobby = () => {
                 className='btn btn-primary p-2 rounded-3'
                 onClick={async () => {
                   const roomList = await getRoomList();
-                  setSlicedRoomList(sliceRoomList({ roomList }));
+                  setSlicedRoomList(roomList);
                   setPage(1);
                 }}
               >
