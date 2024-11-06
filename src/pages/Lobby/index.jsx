@@ -108,7 +108,10 @@ const Lobby = () => {
             </div>
             <div className='col-3'>
               {/* 프로필 */}
-              <Profile {...userProfile} image={userProfile.profile_image} />
+              <Profile
+                image={userProfile.profile_image}
+                intraId={userProfile.intra_id}
+              />
               <button
                 type='button'
                 className='btn btn-secondary py-2 mt-3 w-100'
