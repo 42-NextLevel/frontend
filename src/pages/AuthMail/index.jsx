@@ -6,6 +6,7 @@ import { postEmail } from '@/services/auth.js';
 
 const AuthMail = () => {
   const [email, setEmail] = useState('');
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   const isValidEmail = validateEmail(email);
   const navigate = useNavigate();
   const handldeClick = () => {
@@ -18,6 +19,7 @@ const AuthMail = () => {
     postEmail(email).then(() => {
       navigate('/auth/code', { replace: true });
     });
+    setButtonDisabled(true);
   };
 
   return (
@@ -41,7 +43,9 @@ const AuthMail = () => {
           </span>
         )}
       </div>
-      <Button onClick={handldeClick}>다음</Button>
+      <Button onClick={handldeClick} disabled={buttonDisabled}>
+        다음
+      </Button>
     </div>
   );
 };

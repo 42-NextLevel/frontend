@@ -19,6 +19,9 @@ export const updateAttributes = (target, newProps, oldProps) => {
       }
       return;
     }
+    if (!value) {
+      return target.removeAttribute(convertAttribute(attr));
+    }
     setAttribute(target, attr, value);
   });
 };
