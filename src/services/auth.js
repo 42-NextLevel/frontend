@@ -47,8 +47,10 @@ export const getNewToken = () => {
     .then((res) => {
       const { accessToken } = res.data;
       localStorage.setItem('access_token', accessToken);
+      return true;
     })
     .catch((e) => {
       localStorage.removeItem('access_token');
+      return false;
     });
 };
