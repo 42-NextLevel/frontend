@@ -1,5 +1,5 @@
 import { createElement } from './createElement.js';
-import { isEventAttribute, setAttribute } from './attribute.js';
+import { updateAttributes } from './attribute.js';
 
 export const updateElement = (parent, currentVNode, newVNode, index = 0) => {
   // 1. newNode만 있는 경우 -> node 추가
@@ -55,25 +55,6 @@ export const updateElements = (parent, currentVNodes, newVNodes) => {
   for (let i = 0; i < maxLength; i++) {
     index = updateElement(parent, currentVNodes[i], newVNodes[i], index ?? i);
   }
-};
-
-const updateAttributes = (target, newProps, oldProps) => {
-  Object.entries(oldProps).forEach(([attr, value]) => {
-    if (isEventAttribute(attr, value)) {
-      const event = attr.slice(2).toLowerCase();
-      return target.removeEventListener(event, value);
-    }
-    if (newProps[attr] === undefined) {
-      target.removeAttribute(attr);
-    }
-  });
-
-  Object.entries(newProps).forEach(([attr, value]) => {
-    if (oldProps[attr] === newProps[attr]) {
-      return;
-    }
-    setAttribute(target, attr, value);
-  });
 };
 
 const isExist = (node) => {

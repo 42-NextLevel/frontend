@@ -2,19 +2,37 @@ import Modal from '@/components/Modal';
 import Input from '@/components/Input';
 import { postJoinRoom } from '@/services/game';
 import { useState } from '@/library/hooks.js';
+import { useNavigate } from '@/library/router/hooks.js';
 
-const JoinModal = ({ id, name }) => {
+const JoinModal = ({ id, room }) => {
   const [nickname, setNickname] = useState('');
+  const navigate = useNavigate();
 
   const joinRoom = async () => {
-    const data = {
+    postJoinRoom({
       nickname: nickname,
-      roomId: id,
-    };
-    const response = await postJoinRoom(data);
+      roomId: room.id,
+    })
+      .then(() => {
+        navigate(`/room/${room.id}`);
+      })
+      .catch(() => {
+        alert('입장할 수 없습니다.');
+      });
   };
+
+  const resetInput = () => {
+    setNickname('');
+  }
+
   return (
-    <Modal id={id} onClick={joinRoom} title={`\"${name}\" 입장`} btnText='입장'>
+    <Modal
+      id={id}
+      onClick={joinRoom}
+      onClose={resetInput}
+      title={`\"${room.name}\" 입장`}
+      btnText='입장'
+    >
       <Input
         label='닉네임'
         type='text'

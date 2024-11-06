@@ -21,7 +21,14 @@ const Auth = () => {
     handleRedirect();
   }, []);
 
-  return null;
+  return (
+    <div className='wrap'>
+      <div className='spinner-border' role='status'>
+        <span className='visually-hidden'>Loading...</span>
+      </div>
+      <div className='mt-2'>로그인중..</div>
+    </div>
+  );
 };
 
 export default Auth;

@@ -22,7 +22,7 @@ class Router {
     const { element, loader, params } = matchRoute(this.routes, this.path);
     this.params = params;
     if (loader && typeof loader === 'function') {
-      return loader().then((data) => {
+      return loader({ params }).then((data) => {
         this.loaderData = data;
         return element;
       });

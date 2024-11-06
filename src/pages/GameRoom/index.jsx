@@ -5,6 +5,8 @@ import Button from '@/components/Button';
 import Profile from '@/components/Profile';
 import Badge from '@/components/Badge';
 
+import { gameStart } from '@/services/room.js';
+
 import { GAME_RULES, TYPES } from './constants.js';
 
 const GameRoom = () => {
@@ -20,15 +22,19 @@ const GameRoom = () => {
 
   useEffect(() => {
     const websocket = new WebSocket(
-      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intra_id}`,
+      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intraId=${intra_id}`,
     );
+    websocket.onerror = () => {
+      alert('입장 실패');
+      navigate('/lobby', { replace: true });
+    };
     websocket.onmessage = (event) => {
       const { type, data } = JSON.parse(event.data);
       switch (type) {
         case TYPES.roomUpdate:
           return setRoom(data);
         case TYPES.gameStart:
-          return navigate(`/game/${roomId}`);
+          return navigate(`/game/${roomId}`, { replace: true });
       }
     };
 
@@ -38,13 +44,17 @@ const GameRoom = () => {
   }, []);
 
   const handleClick = () => {
-    gameStart(roomId).catch((err) => {
-      alert('error');
+    if (room.host !== nickname) {
+      alert('방장만 게임을 시작할 수 있습니다.');
+      return;
+    }
+    gameStart(roomId).catch(() => {
+      alert('아직 게임을 시작할 수 없습니다.');
     });
   };
 
   return (
-    <div className='py-5 wrap min-vh-100 d-flex flex-column align-items-center justify-content-center'>
+    <div className='py-5 wrap'>
       <Badge roomType={room.roomType} />
       <h1 className='mt-2'>{room.name}</h1>
       <ul className='w-100 row py-5 mb-2 justify-content-center'>
@@ -58,9 +68,7 @@ const GameRoom = () => {
           </li>
         ))}
       </ul>
-      <Button disabled={room.host === intra_id} onClick={handleClick}>
-        게임 시작
-      </Button>
+      <Button onClick={handleClick}>게임 시작</Button>
       <h5 className='mt-5'>🏓 게임 규칙</h5>
       <ul>
         {GAME_RULES.map((rule) => (
