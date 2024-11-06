@@ -5,7 +5,17 @@ export const getHistory = () => {
 };
 
 export const getRoomList = async () => {
-  return service.get('/game/list').then((res) => res.data);
+  return service.get('/game/list').then((res) => {
+    const roomList = res.data;
+    const slicedRoomList = [];
+
+    for (let i = 0; i < roomList.length; i += 4) {
+      const chunk = roomList.slice(i, i + 4);
+      slicedRoomList.push(chunk);
+    }
+
+    return slicedRoomList;
+  });
 };
 
 export const postMakeRoom = async (data) => {

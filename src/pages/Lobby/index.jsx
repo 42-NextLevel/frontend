@@ -2,54 +2,34 @@ import Profile from '@/components/Profile/index';
 import RoomCard from './components/RoomCard';
 import AddRoundIcon from '/images/add-round.svg';
 import RefreshIcon from '/images/refresh.svg';
-import { getRoomList } from '../../services/game';
-import { getUserProfile, logout } from '../../services/user';
-import { useEffect, useState } from '@/library/hooks.js';
+import { useState } from '@/library/hooks.js';
 import ModalTrigger from '@/components/ModalTrigger';
 import JoinModal from './components/JoinModal';
 import CreateModal from './components/CreateModal';
+import { useLoaderData } from '@/library/router/hooks.js';
+import { getRoomList } from '@/services/game';
+import { logout } from '@/services/user';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
 
 const Lobby = () => {
-  const [roomList, setRoomList] = useState([]);
-  const [userProfile, setUserProfile] = useState();
+  const { roomList, userProfile } = useLoaderData();
+  const [slicedRoomList, setSlicedRoomList] = useState(roomList);
   const [page, setPage] = useState(1);
   const [isThrottle, setIsThrottle] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState({ name: '', id: '' });
-
-  const fetchRoomList = async () => {
-    const response = [...(await getRoomList())];
-    // const response = [...(await getTestRoomList())];
-    const slicedResponse = [];
-
-    for (let i = 0; i < response.length; i += 4) {
-      const chunk = response.slice(i, i + 4);
-      slicedResponse.push(chunk);
-    }
-
-    setRoomList(slicedResponse);
-    setPage(1);
-  };
-
-  const fetchUserProfile = async () => {
-    const response = await getUserProfile();
-    // const response = await getTestUserProfile();
-    setUserProfile(response);
-  };
-
-  useEffect(() => {
-    fetchRoomList();
-    fetchUserProfile();
-  }, []);
 
   const handleWheel = (event) => {
     if (!isThrottle) {
       setIsThrottle(true);
       if (event.deltaY > 0) {
-        setPage((prevPage) => (prevPage < roomList.length ? prevPage + 1 : 1));
+        setPage((prevPage) =>
+          prevPage < slicedRoomList.length ? prevPage + 1 : 1,
+        );
       } else {
-        setPage((prevPage) => (prevPage > 1 ? prevPage - 1 : roomList.length));
+        setPage((prevPage) =>
+          prevPage > 1 ? prevPage - 1 : slicedRoomList.length,
+        );
       }
       setTimeout(() => {
         setIsThrottle(false);
@@ -61,7 +41,7 @@ const Lobby = () => {
     setSelectedRoom(roomInfo);
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
       const response = await logout();
       if (response.status === 200) {
@@ -91,7 +71,11 @@ const Lobby = () => {
               </ModalTrigger>
               <button
                 className='btn btn-primary p-2 rounded-3'
-                onClick={fetchRoomList}
+                onClick={async () => {
+                  const roomList = await getRoomList();
+                  setSlicedRoomList(roomList);
+                  setPage(1);
+                }}
               >
                 <img src={RefreshIcon} alt='refresh-icon' />
               </button>
@@ -101,12 +85,12 @@ const Lobby = () => {
             <div className='col-9' onWheel={handleWheel}>
               <div className='row mx-0' style='height: 294px'>
                 {/* 방 리스트 */}
-                {roomList.length === 0 && (
+                {slicedRoomList.length === 0 && (
                   <h5 className='col-12 text-center align-self-center text-secondary'>
                     방이 없습니다
                   </h5>
                 )}
-                {roomList[page - 1]?.map((roomInfo, index) => (
+                {slicedRoomList[page - 1]?.map((roomInfo, index) => (
                   <div
                     key={roomInfo.id}
                     className={`col-6 px-0 pe-3 ${index < 2 ? 'pb-3' : ''}`}
@@ -120,7 +104,7 @@ const Lobby = () => {
               </div>
               <div className='d-flex justify-content-center pe-3 pt-2'>
                 {/* 페이지네이션 */}
-                {Array.from({ length: roomList.length }, (_, index) => (
+                {Array.from({ length: slicedRoomList.length }, (_, index) => (
                   <div
                     key={index}
                     className={`mx-1 rounded-circle ${page === index + 1 ? 'bg-primary' : 'border border-primary'}`}
@@ -132,11 +116,14 @@ const Lobby = () => {
             </div>
             <div className='col-3'>
               {/* 프로필 */}
-              <Profile {...userProfile} image={userProfile.profile_image} />
+              <Profile
+                image={userProfile.profile_image}
+                intraId={userProfile.intra_id}
+              />
               <button
                 type='button'
                 className='btn btn-secondary py-2 mt-3 w-100'
-                onClick={logout}
+                onClick={handleLogout}
               >
                 로그아웃
               </button>
