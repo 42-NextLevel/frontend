@@ -70,7 +70,6 @@ const Lobby = () => {
       }
     } catch (err) {
       if (err.response.status === 401) window.location.href = '/';
-      else console.error(err);
     }
   };
 
