@@ -22,7 +22,7 @@ const GameRoom = () => {
 
   useEffect(() => {
     const websocket = new WebSocket(
-      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intra_id=${intra_id}`,
+      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intraId=${intra_id}`,
     );
     websocket.onerror = () => {
       alert('입장 실패');
@@ -44,8 +44,12 @@ const GameRoom = () => {
   }, []);
 
   const handleClick = () => {
+    if (room.host !== nickname) {
+      alert('방장만 게임을 시작할 수 있습니다.');
+      return;
+    }
     gameStart(roomId).catch(() => {
-      alert('게임을 시작할 수 없습니다.');
+      alert('아직 게임을 시작할 수 없습니다.');
     });
   };
 
@@ -64,9 +68,7 @@ const GameRoom = () => {
           </li>
         ))}
       </ul>
-      <Button disabled={room.host === intra_id} onClick={handleClick}>
-        게임 시작
-      </Button>
+      <Button onClick={handleClick}>게임 시작</Button>
       <h5 className='mt-5'>🏓 게임 규칙</h5>
       <ul>
         {GAME_RULES.map((rule) => (
