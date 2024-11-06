@@ -9,6 +9,7 @@ import CreateModal from './components/CreateModal';
 import { useLoaderData } from '@/library/router/hooks.js';
 import { getRoomList } from '@/services/game';
 import { sliceRoomList } from '@/util/sliceRoomList';
+import { logout } from '@/services/user';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
 
@@ -41,7 +42,7 @@ const Lobby = () => {
     setSelectedRoom(roomInfo);
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
       const response = await logout();
       if (response.status === 200) {
@@ -123,7 +124,7 @@ const Lobby = () => {
               <button
                 type='button'
                 className='btn btn-secondary py-2 mt-3 w-100'
-                onClick={logout}
+                onClick={handleLogout}
               >
                 로그아웃
               </button>
