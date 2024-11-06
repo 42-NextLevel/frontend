@@ -6,24 +6,30 @@ import { useState } from '@/library/hooks.js';
 import ModalTrigger from '@/components/ModalTrigger';
 import JoinModal from './components/JoinModal';
 import CreateModal from './components/CreateModal';
-import { useLoaderData, useNavigate } from '@/library/router/hooks.js';
+import { useLoaderData } from '@/library/router/hooks.js';
+import { getRoomList } from '@/services/game';
+import { sliceRoomList } from '@/util/sliceRoomList';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
 
 const Lobby = () => {
   const { roomList, userProfile } = useLoaderData();
+  const [slicedRoomList, setSlicedRoomList] = useState(roomList);
   const [page, setPage] = useState(1);
   const [isThrottle, setIsThrottle] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState({ name: '', id: '' });
-  const navigate = useNavigate();
 
   const handleWheel = (event) => {
     if (!isThrottle) {
       setIsThrottle(true);
       if (event.deltaY > 0) {
-        setPage((prevPage) => (prevPage < roomList.length ? prevPage + 1 : 1));
+        setPage((prevPage) =>
+          prevPage < slicedRoomList.length ? prevPage + 1 : 1,
+        );
       } else {
-        setPage((prevPage) => (prevPage > 1 ? prevPage - 1 : roomList.length));
+        setPage((prevPage) =>
+          prevPage > 1 ? prevPage - 1 : slicedRoomList.length,
+        );
       }
       setTimeout(() => {
         setIsThrottle(false);
@@ -65,8 +71,10 @@ const Lobby = () => {
               </ModalTrigger>
               <button
                 className='btn btn-primary p-2 rounded-3'
-                onClick={() => {
-                  navigate('/lobby', { replace: true });
+                onClick={async () => {
+                  const roomList = await getRoomList();
+                  setSlicedRoomList(sliceRoomList({ roomList }));
+                  setPage(1);
                 }}
               >
                 <img src={RefreshIcon} alt='refresh-icon' />
@@ -77,12 +85,12 @@ const Lobby = () => {
             <div className='col-9' onWheel={handleWheel}>
               <div className='row mx-0' style='height: 294px'>
                 {/* 방 리스트 */}
-                {roomList.length === 0 && (
+                {slicedRoomList.length === 0 && (
                   <h5 className='col-12 text-center align-self-center text-secondary'>
                     방이 없습니다
                   </h5>
                 )}
-                {roomList[page - 1]?.map((roomInfo, index) => (
+                {slicedRoomList[page - 1]?.map((roomInfo, index) => (
                   <div
                     key={roomInfo.id}
                     className={`col-6 px-0 pe-3 ${index < 2 ? 'pb-3' : ''}`}
@@ -96,7 +104,7 @@ const Lobby = () => {
               </div>
               <div className='d-flex justify-content-center pe-3 pt-2'>
                 {/* 페이지네이션 */}
-                {Array.from({ length: roomList.length }, (_, index) => (
+                {Array.from({ length: slicedRoomList.length }, (_, index) => (
                   <div
                     key={index}
                     className={`mx-1 rounded-circle ${page === index + 1 ? 'bg-primary' : 'border border-primary'}`}

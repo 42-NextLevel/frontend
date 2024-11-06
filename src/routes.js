@@ -8,7 +8,7 @@ import Game from '@/pages/Game';
 
 import { getUserInfo } from './services/room.js';
 import { getPlayersInfo } from './services/game.js';
-import { lobbyLoader } from './pages/Lobby/lobby.loader.jsx';
+import { lobbyLoader } from '@/services/lobby.js';
 
 export const routes = [
   {
