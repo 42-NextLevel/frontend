@@ -13,12 +13,15 @@ export const updateAttributes = (target, newProps, oldProps) => {
     if (oldProps[attr] === newProps[attr]) {
       return;
     }
+    if (!value) {
+      return target.removeAttribute(convertAttribute(attr));
+    }
     setAttribute(target, attr, value);
   });
 };
 
 const isEventAttribute = (attribute, value) =>
-  attribute.startsWith("on") && typeof value === "function";
+  attribute.startsWith('on') && typeof value === 'function';
 
 export const setAttribute = (element, attr, value) => {
   if (isEventAttribute(attr, value)) {
@@ -30,10 +33,10 @@ export const setAttribute = (element, attr, value) => {
 
 const convertAttribute = (attribute) => {
   switch (attribute) {
-    case "className":
-      return "class";
-    case "htmlFor":
-      return "for";
+    case 'className':
+      return 'class';
+    case 'htmlFor':
+      return 'for';
     default:
       return attribute;
   }

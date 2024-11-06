@@ -6,6 +6,7 @@ import { postCode } from '@/services/auth';
 
 const AuthCode = () => {
   const [code, setCode] = useState('');
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   const isValidCode = validateCode(code);
   const navigate = useNavigate();
   const handldeClick = () => {
@@ -15,9 +16,15 @@ const AuthCode = () => {
     if (!isValidCode) {
       return alert('인증 코드는 6자리 숫자로 입력해주세요');
     }
-    postCode(code).then(() => {
-      navigate('/lobby', { replace: true });
-    });
+    postCode(code)
+      .then(() => {
+        navigate('/lobby', { replace: true });
+      })
+      .catch(() => {
+        alert('인증 코드가 올바르지 않습니다');
+        setButtonDisabled(false);
+      });
+    setButtonDisabled(true);
   };
 
   return (
@@ -43,7 +50,9 @@ const AuthCode = () => {
           </span>
         )}
       </div>
-      <Button onClick={handldeClick}>인증 활성화</Button>
+      <Button onClick={handldeClick} disabled={buttonDisabled}>
+        인증 활성화
+      </Button>
     </div>
   );
 };
