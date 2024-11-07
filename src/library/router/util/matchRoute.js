@@ -22,9 +22,8 @@ const flattenRoutes = (routes, branches = [], parentPath = '') => {
     }
 
     branches.push({
+      ...route,
       path,
-      element: route.element,
-      loader: route.loader,
       score: computeScore(path, route.index),
     });
   });
