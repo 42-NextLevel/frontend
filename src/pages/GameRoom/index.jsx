@@ -25,7 +25,7 @@ const GameRoom = () => {
       `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intraId=${intra_id}`,
     );
     websocket.onerror = () => {
-      alert('입장 실패');
+      alert('잘못된 접근입니다.');
       navigate('/lobby', { replace: true });
     };
     websocket.onmessage = (event) => {
@@ -52,6 +52,10 @@ const GameRoom = () => {
       alert('아직 게임을 시작할 수 없습니다.');
     });
   };
+
+  if (!room.players.length) {
+    return null;
+  }
 
   return (
     <div className='py-5 wrap'>
