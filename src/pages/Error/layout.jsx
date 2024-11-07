@@ -1,6 +1,6 @@
 import { useNavigate } from '@/library/router/hooks.js';
 
-const Error = ({ code, title, message }) => {
+const Error = ({ code, title, message, buttonLabel }) => {
   const navigate = useNavigate();
 
   return (
@@ -13,7 +13,7 @@ const Error = ({ code, title, message }) => {
         type='button'
         onClick={() => navigate('/', { replace: true })}
       >
-        Go Home
+        {buttonLabel}
       </button>
     </div>
   );

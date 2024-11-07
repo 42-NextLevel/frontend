@@ -1,12 +1,14 @@
 export const ERROR_PAGE_MESSAGE = {
-  403: {
-    code: 403,
-    title: 'Forbidden',
-    message: 'Please log in to access this page.',
+  401: {
+    code: 401,
+    title: 'Unauthorized',
+    message: 'Sorry, you are not authorized to access this page.',
+    buttonLabel: 'Log In',
   },
   404: {
     code: 404,
     title: 'Page Not Found',
     message: 'Sorry, the page you’re looking for doesn’t exist.',
+    buttonLabel: 'Go Home',
   },
 };
