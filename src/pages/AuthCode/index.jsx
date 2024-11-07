@@ -39,7 +39,7 @@ const AuthCode = () => {
       </p>
       <div className='my-4'>
         <Input
-          placeholder='인증 코드를를 입력해주세요'
+          placeholder='인증 코드를 입력해주세요'
           type='password'
           label='Verification Code'
           onChange={(e) => setCode(e.target.value)}
