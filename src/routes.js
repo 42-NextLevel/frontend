@@ -1,10 +1,10 @@
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
-import AuthMail from '@/pages/AuthMail';
-import AuthCode from '@/pages/AuthCode';
 import Lobby from '@/pages/Lobby';
 import GameRoom from '@/pages/GameRoom';
 import Game from '@/pages/Game';
+import Unauthorized from '@/pages/Error/401';
+import PageNotFound from '@/pages/Error/404';
 
 import { getUserInfo } from './services/room.js';
 import { getPlayersInfo } from './services/game.js';
@@ -17,25 +17,13 @@ export const routes = [
   },
   {
     path: '/auth',
-    children: [
-      {
-        index: true,
-        element: Auth,
-      },
-      {
-        path: 'mail',
-        element: AuthMail,
-      },
-      {
-        path: 'code',
-        element: AuthCode,
-      },
-    ],
+    element: Auth,
   },
   {
     path: '/lobby',
     element: Lobby,
     loader: lobbyLoader,
+    errorElement: Unauthorized,
   },
   {
     path: '/room/:roomId',
@@ -46,5 +34,10 @@ export const routes = [
     path: '/game/:roomId',
     element: Game,
     loader: ({ params }) => getPlayersInfo(params.roomId),
+    errorElement: PageNotFound,
+  },
+  {
+    path: '*',
+    element: PageNotFound,
   },
 ];

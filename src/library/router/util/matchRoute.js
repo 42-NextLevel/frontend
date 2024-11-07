@@ -22,9 +22,8 @@ const flattenRoutes = (routes, branches = [], parentPath = '') => {
     }
 
     branches.push({
+      ...route,
       path,
-      element: route.element,
-      loader: route.loader,
       score: computeScore(path, route.index),
     });
   });
@@ -37,25 +36,32 @@ const dynamicSegmentValue = 3;
 const indexRouteValue = 2;
 const emptySegmentValue = 1;
 const staticSegmentValue = 10;
+const splatPenalty = -2;
+const isSplat = (s) => s === '*';
 
 const computeScore = (path, index) => {
   const segments = path.split('/');
   let initialScore = segments.length;
+  if (segments.some(isSplat)) {
+    initialScore += splatPenalty;
+  }
 
   if (index) {
     initialScore += indexRouteValue;
   }
 
-  return segments.reduce(
-    (score, segment) =>
-      score +
-      (paramRe.test(segment)
-        ? dynamicSegmentValue
-        : segment === ''
-          ? emptySegmentValue
-          : staticSegmentValue),
-    initialScore,
-  );
+  return segments
+    .filter((s) => !isSplat(s))
+    .reduce(
+      (score, segment) =>
+        score +
+        (paramRe.test(segment)
+          ? dynamicSegmentValue
+          : segment === ''
+            ? emptySegmentValue
+            : staticSegmentValue),
+      initialScore,
+    );
 };
 
 const joinPath = (path, parentPath) => {
@@ -102,7 +108,7 @@ const matchPath = (pattern, pathname) => {
 
 const compilePath = (path) => {
   const params = [];
-  const regexpSource =
+  let regexpSource =
     '^' +
     path
       .replace(/\/*\*?$/, '')
@@ -110,8 +116,15 @@ const compilePath = (path) => {
       .replace(/:([\w-]+)/g, (_, paramName) => {
         params.push({ paramName });
         return '([^\\/]+)';
-      }) +
-    '$';
+      });
+
+  if (path.endsWith('*')) {
+    params.push({ paramName: '*' });
+    regexpSource +=
+      path === '*' || path === '/*' ? '(.*)$' : '(?:\\/(.+)|\\/*)$';
+  } else {
+    regexpSource += '\\/*$';
+  }
 
   const matcher = new RegExp(regexpSource);
   return [matcher, params];

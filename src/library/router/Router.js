@@ -19,13 +19,18 @@ class Router {
 
   loadRoute() {
     this.path = window.location.pathname;
-    const { element, loader, params } = matchRoute(this.routes, this.path);
+    const { element, loader, params, errorElement } = matchRoute(
+      this.routes,
+      this.path,
+    );
     this.params = params;
     if (loader && typeof loader === 'function') {
-      return loader({ params }).then((data) => {
-        this.loaderData = data;
-        return element;
-      });
+      return loader({ params })
+        .then((data) => {
+          this.loaderData = data;
+          return element;
+        })
+        .catch(() => errorElement);
     }
     return Promise.resolve(element);
   }
