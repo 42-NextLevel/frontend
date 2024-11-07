@@ -213,7 +213,6 @@ export class PongGame {
     this.websocket = new WebSocket(webSocketConnectionURI);
     this.websocket.onopen = () => {
 		// 게임 상태와 시간 동기화 요청
-		console.log('WebSocket connected, requesting initial state...');
 		this.websocket.send(JSON.stringify({ 
 		  type: 'request_initial_state'
 		}));
