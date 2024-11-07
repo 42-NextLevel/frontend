@@ -83,7 +83,7 @@ export class PongGame {
     this.serverTimeDiff = 0;
     this.lastProcessedTime = null;
 
-	this.waitForInitialState();
+    this.waitForInitialState();
   }
 
   waitForInitialState() {
@@ -211,12 +211,18 @@ export class PongGame {
 
   initWebSocket(webSocketConnectionURI) {
     this.websocket = new WebSocket(webSocketConnectionURI);
+    this.websocket.onerror = () => {
+      alert('잘못된 접근입니다.');
+      this.navigate('/lobby', { replace: true });
+    };
     this.websocket.onopen = () => {
-		// 게임 상태와 시간 동기화 요청
-		this.websocket.send(JSON.stringify({ 
-		  type: 'request_initial_state'
-		}));
-	  };
+      // 게임 상태와 시간 동기화 요청
+      this.websocket.send(
+        JSON.stringify({
+          type: 'request_initial_state',
+        }),
+      );
+    };
     this.websocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       this.handleServerMessage(data);
@@ -230,15 +236,15 @@ export class PongGame {
         const serverTimestamp = data.server_timestamp; // 서버에서 보낸 타임스탬프
         this.serverTimeDiff = serverTimestamp - clientTime;
         break;
-	  case 'initial_game_state':
-		// 초기 게임 상태 설정
-		this.states = {
-			ball: data.ball,
-			paddle: data.paddle,
-			score: data.score || { player1: 0, player2: 0 }
-		};
-		this.updateGameObjects(); // 초기 상태로 게임 오브젝트 업데이트
-		break;
+      case 'initial_game_state':
+        // 초기 게임 상태 설정
+        this.states = {
+          ball: data.ball,
+          paddle: data.paddle,
+          score: data.score || { player1: 0, player2: 0 },
+        };
+        this.updateGameObjects(); // 초기 상태로 게임 오브젝트 업데이트
+        break;
       case 'game_start':
         return this.setGameStarted();
       case 'countdown_sequence':

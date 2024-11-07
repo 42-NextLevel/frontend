@@ -3,6 +3,7 @@ import Input from '@/components/Input';
 import { postJoinRoom } from '@/services/game';
 import { useState } from '@/library/hooks.js';
 import { useNavigate } from '@/library/router/hooks.js';
+import { ERROR_MESSAGE } from '../constants.js';
 
 const JoinModal = ({ id, room }) => {
   const [nickname, setNickname] = useState('');
@@ -16,8 +17,9 @@ const JoinModal = ({ id, room }) => {
       .then(() => {
         navigate(`/room/${room.id}`);
       })
-      .catch(() => {
-        alert('입장할 수 없습니다.');
+      .catch((e) => {
+        const { error } = e.response.data;
+        alert(ERROR_MESSAGE[error]);
       });
   };
 
