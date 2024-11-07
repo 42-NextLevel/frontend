@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from '@/library/router/hooks.js';
 import { useEffect, useState } from '@/library/hooks.js';
 import { post42Code } from '@/services/auth.js';
 
-import PageNotFound from '@/pages/404';
+import PageNotFound from '@/pages/Error/404';
 import AuthCode from '@/pages/AuthCode';
 import AuthMail from '@/pages/AuthMail';
 
