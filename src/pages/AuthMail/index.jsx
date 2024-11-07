@@ -15,6 +15,8 @@ const AuthMail = ({ onSuccess }) => {
       return alert('이메일을 형식에 맞게 입력해주세요');
     }
     postEmail(email).then(() => {
+      setEmail('');
+      setButtonDisabled(false);
       onSuccess();
     });
     setButtonDisabled(true);
