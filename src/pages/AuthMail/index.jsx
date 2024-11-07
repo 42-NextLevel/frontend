@@ -1,14 +1,12 @@
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { useState } from '@/library/hooks.js';
-import { useNavigate } from '@/library/router/hooks.js';
 import { postEmail } from '@/services/auth.js';
 
-const AuthMail = () => {
+const AuthMail = ({ onSuccess }) => {
   const [email, setEmail] = useState('');
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const isValidEmail = validateEmail(email);
-  const navigate = useNavigate();
   const handldeClick = () => {
     if (!email) {
       return alert('이메일을 입력해주세요');
@@ -17,7 +15,7 @@ const AuthMail = () => {
       return alert('이메일을 형식에 맞게 입력해주세요');
     }
     postEmail(email).then(() => {
-      navigate('/auth/code', { replace: true });
+      onSuccess();
     });
     setButtonDisabled(true);
   };

@@ -1,7 +1,10 @@
 import { useNavigate, useSearchParams } from '@/library/router/hooks.js';
-import { useEffect } from '@/library/hooks.js';
+import { useEffect, useState } from '@/library/hooks.js';
 import { post42Code } from '@/services/auth.js';
-import PageNotFound from '@/pages/404/index.jsx';
+
+import PageNotFound from '@/pages/404';
+import AuthCode from '@/pages/AuthCode';
+import AuthMail from '@/pages/AuthMail';
 
 const Auth = () => {
   const searchParams = useSearchParams();
@@ -10,6 +13,7 @@ const Auth = () => {
     return <PageNotFound />;
   }
 
+  const [page, setPage] = useState(0);
   const navigate = useNavigate();
   const handleRedirect = () => {
     if (searchParams.get('error')) {
@@ -18,9 +22,10 @@ const Auth = () => {
     post42Code(code)
       .then(({ registered }) => {
         if (registered) {
-          return navigate('/auth/code', { replace: true });
+          setPage(2);
+          return;
         }
-        return navigate('/auth/mail', { replace: true });
+        setPage(1);
       })
       .catch(() => {
         alert('잘못된 접근입니다.');
@@ -31,6 +36,14 @@ const Auth = () => {
   useEffect(() => {
     handleRedirect();
   }, []);
+
+  if (page === 1) {
+    return <AuthMail onSuccess={() => setPage(2)} />;
+  }
+
+  if (page === 2) {
+    return <AuthCode />;
+  }
 
   return (
     <div className='wrap'>

@@ -1,7 +1,5 @@
 import Home from '@/pages/Home';
 import Auth from '@/pages/Auth';
-import AuthMail from '@/pages/AuthMail';
-import AuthCode from '@/pages/AuthCode';
 import Lobby from '@/pages/Lobby';
 import GameRoom from '@/pages/GameRoom';
 import Game from '@/pages/Game';
@@ -17,20 +15,7 @@ export const routes = [
   },
   {
     path: '/auth',
-    children: [
-      {
-        index: true,
-        element: Auth,
-      },
-      {
-        path: 'mail',
-        element: AuthMail,
-      },
-      {
-        path: 'code',
-        element: AuthCode,
-      },
-    ],
+    element: Auth,
   },
   {
     path: '/lobby',
