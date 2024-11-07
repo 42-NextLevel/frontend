@@ -232,7 +232,6 @@ export class PongGame {
         break;
 	  case 'initial_game_state':
 		// 초기 게임 상태 설정
-		console.log('Received initial game state:', data);
 		this.states = {
 			ball: data.ball,
 			paddle: data.paddle,
