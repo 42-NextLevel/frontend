@@ -36,4 +36,8 @@ export const routes = [
     loader: ({ params }) => getPlayersInfo(params.roomId),
     errorElement: PageNotFound,
   },
+  {
+    path: '*',
+    element: PageNotFound,
+  },
 ];
