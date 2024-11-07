@@ -211,6 +211,10 @@ export class PongGame {
 
   initWebSocket(webSocketConnectionURI) {
     this.websocket = new WebSocket(webSocketConnectionURI);
+    this.websocket.onerror = () => {
+      alert('잘못된 접근입니다.');
+      this.navigate('/lobby', { replace: true });
+    };
     this.websocket.onopen = () => {
       // 게임 상태와 시간 동기화 요청
       this.websocket.send(
