@@ -8,6 +8,7 @@ import JoinModal from '@/pages/lobby/components/JoinModal';
 import CreateModal from '@/pages/lobby/components/CreateModal';
 import { useLoaderData } from '@/library/router/hooks.js';
 import { logout } from '@/services/user';
+import { getRoomList } from '@/services/game';
 import { HistoryList } from '@/pages/lobby/components/HistoryList';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
