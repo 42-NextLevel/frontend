@@ -9,23 +9,23 @@ Object.freeze(MatchType);
 export const HistoryTile = ({ history, id }) => {
   return (
     <>
-      <div class='accordion-item'>
-        <h2 class='accordion-header'>
+      <div className='accordion-item'>
+        <h2 className='accordion-header'>
           <button
-            class='accordion-button collapsed'
+            className='accordion-button collapsed'
             type='button'
             data-bs-toggle='collapse'
             data-bs-target={`#${id}`}
             aria-expanded='false'
             aria-controls={id}
           >
-            <div class='w-100 d-flex text-center align-items-center'>
-              <div class='w-25'>{MatchType[history.matchType]}</div>
-              <div class='w-25'>{history.date}</div>
-              <div class='w-25'>
+            <div className='w-100 d-flex text-center align-items-center'>
+              <div className='w-25'>{MatchType[history.matchType]}</div>
+              <div className='w-25'>{history.date}</div>
+              <div className='w-25'>
                 {history.leftNick}vs{history.rightNick}
               </div>
-              <div class='w-25'>
+              <div className='w-25'>
                 {history.leftScore} : {history.rightScore}
               </div>
             </div>
@@ -33,10 +33,10 @@ export const HistoryTile = ({ history, id }) => {
         </h2>
         <div
           id={id}
-          class='accordion-collapse collapse'
+          className='accordion-collapse collapse'
           data-bs-parent='#HistoryList'
         >
-          <div class='accordion-body'>blockchain history</div>
+          <div className='accordion-body'>blockchain history</div>
         </div>
       </div>
     </>
