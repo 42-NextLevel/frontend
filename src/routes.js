@@ -3,6 +3,8 @@ import Auth from '@/pages/Auth';
 import Lobby from '@/pages/Lobby';
 import GameRoom from '@/pages/GameRoom';
 import Game from '@/pages/Game';
+import Unauthorized from '@/pages/Error/401';
+import PageNotFound from '@/pages/Error/404';
 
 import { getUserInfo } from './services/room.js';
 import { getPlayersInfo } from './services/game.js';
@@ -21,6 +23,7 @@ export const routes = [
     path: '/lobby',
     element: Lobby,
     loader: lobbyLoader,
+    errorElement: Unauthorized,
   },
   {
     path: '/room/:roomId',
@@ -31,5 +34,6 @@ export const routes = [
     path: '/game/:roomId',
     element: Game,
     loader: ({ params }) => getPlayersInfo(params.roomId),
+    errorElement: PageNotFound,
   },
 ];

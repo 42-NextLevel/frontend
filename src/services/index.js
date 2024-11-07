@@ -37,7 +37,6 @@ const setAccessToken = () => {
           return axios(originalRequest);
         } catch (error) {
           localStorage.removeItem('access_token');
-          window.location.href = '/';
           return Promise.reject(error);
         }
       }
