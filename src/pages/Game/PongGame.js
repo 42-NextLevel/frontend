@@ -3,11 +3,12 @@ import * as THREE from 'three';
 const LERP_FACTOR = {
   ball: 0.3,
   paddle: 0.5,
+  highlight: 0.1
 };
 const TUNNEL_HEIGHT = 5;
 const TUNNEL_WIDTH = 8;
 const TUNNEL_LENGTH = 42;
-const PADDLE_Z = -2;
+const PADDLE_Z = -1;
 const INITIAL_BALL_SCALE = 0.15;
 const MAX_BALL_SCALE = 1.2;
 const NUM_SEGMENTS = 15;
@@ -18,38 +19,38 @@ export class PongGame {
   keys = { left: false, right: false };
 
   constructor({
-    elementId,
-    roomId,
-    matchType,
-    intraId,
-    nickname,
-    setScore,
-    navigate,
-    setProfile,
+	elementId,
+	roomId,
+	matchType,
+	intraId,
+	nickname,
+	setScore,
+	navigate,
+	setProfile,
   }) {
-    this.roomId = roomId;
-    this.elementId = elementId;
-    this.navigate = navigate;
-    this.setProfile = setProfile;
-    this.objects = {
-      ball: null,
-      playerPaddle: null,
-      opponentPaddle: null,
-      table: null,
-      countdownText: null,
-      winnerText: null,
-    };
+	this.roomId = roomId;
+	this.elementId = elementId;
+	this.navigate = navigate;
+	this.setProfile = setProfile;
+	this.objects = {
+	  ball: null,
+	  playerPaddle: null,
+	  opponentPaddle: null,
+	  table: null,
+	  countdownText: null,
+	  winnerText: null,
+	};
 
-    this.textObjects = {
-      countdown: null,
-      winner: null,
-    };
+	this.textObjects = {
+	  countdown: null,
+	  winner: null,
+	};
 
-    this.inputSequence = 0;
-    this.isStarted = false;
-    this.playerNumber = '';
+	this.inputSequence = 0;
+	this.isStarted = false;
+	this.playerNumber = '';
 	
-    this.states = {
+	this.states = {
 		ball: {
 		  position: { x: 0, y: 0.2, z: -TUNNEL_LENGTH/2 },
 		  velocity: { x: 5, y: 0, z: 5 },
@@ -71,8 +72,8 @@ export class PongGame {
 	this.MIN_SPEED = 5;
 	this.MAX_SPEED = 15;
 
-    const WIDTH = window.innerWidth;
-    const HEIGHT = window.innerHeight;
+	const WIDTH = window.innerWidth;
+	const HEIGHT = window.innerHeight;
 
 	this.renderer = new THREE.WebGLRenderer({
 		antialias: true,    // 계단 현상 방지
@@ -82,32 +83,32 @@ export class PongGame {
 	this.renderer.shadowMap.enabled = true;
 	this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 부드러운 그림자
 
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 1000);
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(WIDTH, HEIGHT);
-    document.getElementById(elementId).appendChild(this.renderer.domElement);
+	this.scene = new THREE.Scene();
+	this.camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 1000);
+	this.renderer = new THREE.WebGLRenderer();
+	this.renderer.setSize(WIDTH, HEIGHT);
+	document.getElementById(elementId).appendChild(this.renderer.domElement);
 
-    this.createGameObjects();
-    this.setupLights();
-    this.setupTextSprites();
+	this.createGameObjects();
+	this.setupLights();
+	this.setupTextSprites();
 
-    document.addEventListener('keydown', this.onKeyDown);
-    document.addEventListener('keyup', this.onKeyUp);
-    window.addEventListener('resize', this.onWindowResize);
-    this.initWebSocket(
-      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/game/${roomId}_${matchType}?nickname=${nickname}&intraId=${intraId}`,
-    );
+	document.addEventListener('keydown', this.onKeyDown);
+	document.addEventListener('keyup', this.onKeyUp);
+	window.addEventListener('resize', this.onWindowResize);
+	this.initWebSocket(
+	  `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/game/${roomId}_${matchType}?nickname=${nickname}&intraId=${intraId}`,
+	);
 
-    // 카메라 설정
-    this.camera.position.z = 7
-    this.camera.lookAt(0, 0, 7);
+	// 카메라 설정
+	this.camera.position.z = 7
+	this.camera.lookAt(0, 0, 7);
 
-    this.updateScore = setScore;
-    this.serverTimeDiff = 0;
-    this.lastProcessedTime = null;
+	this.updateScore = setScore;
+	this.serverTimeDiff = 0;
+	this.lastProcessedTime = null;
 
-    this.waitForInitialState();
+	this.waitForInitialState();
   }
 
   setupLights() {
@@ -133,23 +134,23 @@ export class PongGame {
   }
 
   waitForInitialState() {
-    if (this.states) {
-      this.processInput();
-    } else {
-      setTimeout(() => this.waitForInitialState(), 100);
-    }
+	if (this.states) {
+	  this.processInput();
+	} else {
+	  setTimeout(() => this.waitForInitialState(), 100);
+	}
   }
 
   getServerTime() {
-    return Date.now() + this.serverTimeDiff;
+	return Date.now() + this.serverTimeDiff;
   }
 
 
   onKeyDown = (event) => {
-      if (event.key === 'ArrowLeft') this.keys.left = true;
-      if (event.key === 'ArrowRight') this.keys.right = true;
-      if (event.key === 'ArrowUp') this.keys.up = true;
-      if (event.key === 'ArrowDown') this.keys.down = true;
+	  if (event.key === 'ArrowLeft') this.keys.left = true;
+	  if (event.key === 'ArrowRight') this.keys.right = true;
+	  if (event.key === 'ArrowUp') this.keys.up = true;
+	  if (event.key === 'ArrowDown') this.keys.down = true;
   };
 
   onKeyUp = (event) => {
@@ -235,50 +236,51 @@ createGameObjects() {
   // 터널 생성
   this.tunnelSegments = [];
   for (let i = 0; i < NUM_SEGMENTS; i++) {
-      const lineGeometry = new THREE.BufferGeometry();
-      const z = -i * SEGMENT_SPACING;
+	  const lineGeometry = new THREE.BufferGeometry();
+	  const z = -i * SEGMENT_SPACING;
 
-      const vertices = new Float32Array([
-          -TUNNEL_WIDTH, -TUNNEL_HEIGHT, z,
-          TUNNEL_WIDTH, -TUNNEL_HEIGHT, z,
-          TUNNEL_WIDTH, TUNNEL_HEIGHT, z,
-          -TUNNEL_WIDTH, TUNNEL_HEIGHT, z,
-          -TUNNEL_WIDTH, -TUNNEL_HEIGHT, z
-      ]);
+	  const vertices = new Float32Array([
+		  -TUNNEL_WIDTH, -TUNNEL_HEIGHT, z,
+		  TUNNEL_WIDTH, -TUNNEL_HEIGHT, z,
+		  TUNNEL_WIDTH, TUNNEL_HEIGHT, z,
+		  -TUNNEL_WIDTH, TUNNEL_HEIGHT, z,
+		  -TUNNEL_WIDTH, -TUNNEL_HEIGHT, z
+	  ]);
 
-      lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-      const line = new THREE.Line(lineGeometry, lineMaterial);
-      this.scene.add(line);
-      this.tunnelSegments.push({ line, material: lineMaterial });
+	  lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+	  const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+	  const line = new THREE.Line(lineGeometry, lineMaterial);
+	  this.scene.add(line);
+	  this.tunnelSegments.push({ line, material: lineMaterial });
   }
 
   // 터널 모서리 연결선
   for (let corner = 0; corner < 4; corner++) {
-      const lineGeometry = new THREE.BufferGeometry();
-      const x = (corner % 2 === 0) ? -TUNNEL_WIDTH : TUNNEL_WIDTH;
-      const y = (corner < 2) ? -TUNNEL_HEIGHT : TUNNEL_HEIGHT;
+	  const lineGeometry = new THREE.BufferGeometry();
+	  const x = (corner % 2 === 0) ? -TUNNEL_WIDTH : TUNNEL_WIDTH;
+	  const y = (corner < 2) ? -TUNNEL_HEIGHT : TUNNEL_HEIGHT;
 
-      const vertices = new Float32Array([
-          x, y, 0,
-          x, y, -TUNNEL_LENGTH
-      ]);
+	  const vertices = new Float32Array([
+		  x, y, 0,
+		  x, y, -TUNNEL_LENGTH
+	  ]);
 
-      lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-      const line = new THREE.Line(lineGeometry, lineMaterial);
-      this.scene.add(line);
+	  lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+	  const lineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+	  const line = new THREE.Line(lineGeometry, lineMaterial);
+	  this.scene.add(line);
   }
 
   // 공 생성
   const ballGeometry = new THREE.SphereGeometry(1, 32, 32); // 더 부드러운 구체를 위해 세그먼트 수 증가
   const ballMaterial = new THREE.MeshPhongMaterial({
-    color: 0x00ff00,          // 기본 색상
-    emissive: 0x002000,       // 약간의 자체 발광
-    specular: 0xffffff,       // 반사광 색상 (하얀색)
-    shininess: 50,            // 반사광 강도
-    transparent: true,        // 투명도 활성화
-    opacity: 0.9             // 살짝 투명하게
+	color: 0x00ff00,          // 기본 색상
+	emissive: 0x002000,       // 약간의 자체 발광
+	specular: 0xffffff,       // 반사광 색상 (하얀색)
+	shininess: 50,            // 반사광 강도
+	transparent: true,        // 투명도 활성화
+	opacity: 0.9             // 살짝 투명하게
+	
   });
 
   this.objects.ball = new THREE.Mesh(ballGeometry, ballMaterial);
@@ -287,10 +289,10 @@ createGameObjects() {
   // 공 주변에 와이어프레임 구체 추가 (시각적 효과)
   const wireframeGeometry = new THREE.SphereGeometry(1.1, 16, 16);
   const wireframeMaterial = new THREE.MeshBasicMaterial({
-    color: 0x00ff00,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.2
+	color: 0x00ff00,
+	wireframe: true,
+	transparent: true,
+	opacity: 0.2
   });
   
   const wireframeSphere = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
@@ -302,9 +304,9 @@ createGameObjects() {
 
   // 회전 속성 추가
   this.ballRotation = {
-    x: 0.01,
-    y: 0.02,
-    z: 0.005
+	x: 0.01,
+	y: 0.02,
+	z: 0.005
   };
 
   // 패들 생성
@@ -313,10 +315,10 @@ createGameObjects() {
   // 반투명한 패들 면
   const planeGeometry = new THREE.PlaneGeometry(2, 2);
   const planeMaterial = new THREE.MeshBasicMaterial({
-    color: 0x0000ff,
-    transparent: true,
-    opacity: 0.3,
-    side: THREE.DoubleSide
+	color: 0x0000ff,
+	transparent: true,
+	opacity: 0.3,
+	side: THREE.DoubleSide
   });
   const paddlePlane = new THREE.Mesh(planeGeometry, planeMaterial);
   paddleGroup.add(paddlePlane);
@@ -325,18 +327,18 @@ createGameObjects() {
   const lineGeometry = new THREE.BufferGeometry();
   const size = 1;
   const vertices = new Float32Array([
-    -size, -size, 0,
-    size, -size, 0,
-    size, size, 0,
-    -size, size, 0,
-    -size, -size, 0
+	-size, -size, 0,
+	size, -size, 0,
+	size, size, 0,
+	-size, size, 0,
+	-size, -size, 0
   ]);
 
   lineGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0x0000ff,
-    transparent: true,
-    opacity: 0.8
+	color: 0x0000ff,
+	transparent: true,
+	opacity: 0.8
   });
 
   const paddleOutline = new THREE.Line(lineGeometry, lineMaterial);
@@ -345,10 +347,10 @@ createGameObjects() {
   // 패들 십자선
   const crossGeometry = new THREE.BufferGeometry();
   const crossVertices = new Float32Array([
-    -size, 0, 0,
-    size, 0, 0,
-    0, -size, 0,
-    0, size, 0
+	-size, 0, 0,
+	size, 0, 0,
+	0, -size, 0,
+	0, size, 0
   ]);
 
   crossGeometry.setAttribute('position', new THREE.BufferAttribute(crossVertices, 3));
@@ -360,95 +362,126 @@ createGameObjects() {
   // 상대 플레이어 패들 생성
   const opponentPaddleGroup = paddleGroup.clone();
   opponentPaddleGroup.traverse((child) => {
-    if (child.material) {
-      child.material = child.material.clone();
-      child.material.color.setHex(0xff0000); // 빨간색으로 변경
-    }
+	if (child.material) {
+	  child.material = child.material.clone();
+	  child.material.color.setHex(0xff0000); // 빨간색으로 변경
+	}
   });
   this.objects.opponentPaddle = opponentPaddleGroup;
 
   this.scene.add(this.objects.playerPaddle);
   this.scene.add(this.objects.opponentPaddle);
+  const highlightGeometry = new THREE.BufferGeometry();
+	const highlightVertices = new Float32Array([
+		-TUNNEL_WIDTH, -TUNNEL_HEIGHT, 0,
+		TUNNEL_WIDTH, -TUNNEL_HEIGHT, 0,
+		TUNNEL_WIDTH, TUNNEL_HEIGHT, 0,
+		-TUNNEL_WIDTH, TUNNEL_HEIGHT, 0,
+		-TUNNEL_WIDTH, -TUNNEL_HEIGHT, 0
+	]);
+
+	highlightGeometry.setAttribute('position', new THREE.BufferAttribute(highlightVertices, 3));
+	const highlightMaterial = new THREE.LineBasicMaterial({ 
+		color: 0xffffff,
+		transparent: true,
+		opacity: 0.8,
+		blending: THREE.AdditiveBlending
+	});
+
+	this.highlightSegment = new THREE.Line(highlightGeometry, highlightMaterial);
+	this.scene.add(this.highlightSegment);
+
+	// 페이드 효과용 보조 세그먼트
+	const fadeGeometry = highlightGeometry.clone();
+	const fadeMaterial = new THREE.LineBasicMaterial({
+		color: 0xffffff,
+		transparent: true,
+		opacity: 0.2,
+		blending: THREE.AdditiveBlending
+	});
+
+	this.fadeSegment = new THREE.Line(fadeGeometry, fadeMaterial);
+	this.scene.add(this.fadeSegment);
 }
 
   setupLights() {
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const pointLight = new THREE.PointLight(0xffffff, 500);
-    pointLight.position.set(0, 10, 0);
-    this.scene.add(pointLight);
+	this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+	const pointLight = new THREE.PointLight(0xffffff, 500);
+	pointLight.position.set(0, 10, 0);
+	this.scene.add(pointLight);
   }
 
   onWindowResize = () => {
-    const WIDTH = window.innerWidth;
-    const HEIGHT = window.innerHeight;
-    this.camera.aspect = WIDTH / HEIGHT;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(WIDTH, HEIGHT);
+	const WIDTH = window.innerWidth;
+	const HEIGHT = window.innerHeight;
+	this.camera.aspect = WIDTH / HEIGHT;
+	this.camera.updateProjectionMatrix();
+	this.renderer.setSize(WIDTH, HEIGHT);
   };
 
   initWebSocket(webSocketConnectionURI) {
-    this.websocket = new WebSocket(webSocketConnectionURI);
-    this.websocket.onerror = () => {
-      alert('잘못된 접근입니다.');
-      this.navigate('/lobby', { replace: true });
-    };
-    this.websocket.onopen = () => {
-      // 게임 상태와 시간 동기화 요청
-      this.websocket.send(
-        JSON.stringify({
-          type: 'request_initial_state',
-        }),
-      );
-    };
-    this.websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      this.handleServerMessage(data);
-    };
+	this.websocket = new WebSocket(webSocketConnectionURI);
+	this.websocket.onerror = () => {
+	  alert('잘못된 접근입니다.');
+	  this.navigate('/lobby', { replace: true });
+	};
+	this.websocket.onopen = () => {
+	  // 게임 상태와 시간 동기화 요청
+	  this.websocket.send(
+		JSON.stringify({
+		  type: 'request_initial_state',
+		}),
+	  );
+	};
+	this.websocket.onmessage = (event) => {
+	  const data = JSON.parse(event.data);
+	  this.handleServerMessage(data);
+	};
   }
 
   handleServerMessage(data) {
-    switch (data.type) {
-      case 'sync_time':
-        const clientTime = Date.now();
-        const serverTimestamp = data.server_timestamp; // 서버에서 보낸 타임스탬프
-        this.serverTimeDiff = serverTimestamp - clientTime;
-        break;
-      case 'initial_game_state':
-        // 초기 게임 상태 설정
-        this.states = {
-          ball: data.ball,
-          paddle: data.paddle,
-          score: data.score || { player1: 0, player2: 0 },
-        };
-        this.updateGameObjects(); // 초기 상태로 게임 오브젝트 업데이트
-        break;
-      case 'game_start':
-        return this.setGameStarted();
-      case 'countdown_sequence':
-        if (this.serverTimeDiff === undefined) {
-          // 시간 동기화가 아직 안 됐으면 잠시 대기 후 재시도
-          setTimeout(() => this.handleCountdownSequence(data), 100);
-          return;
-        }
-        this.handleCountdownSequence(data);
-        break;
-      case 'player_assigned':
-        this.websocket.send(
-          JSON.stringify({
-            type: 'sync_time',
-            client_time: Date.now(), // timestamp 대신 client_time 사용
-          }),
-        );
-        return this.setPlayerNumber(data);
-      case 'opponent_update':
-        return this.updateOpponentPaddle(data);
-      case 'game_state_update':
-        return this.updateGameState(data);
-      case 'countdown':
-        return this.handleCountdown(data);
-      case 'game_end':
-        return this.handleGameEnd(data);
-    }
+	switch (data.type) {
+	  case 'sync_time':
+		const clientTime = Date.now();
+		const serverTimestamp = data.server_timestamp; // 서버에서 보낸 타임스탬프
+		this.serverTimeDiff = serverTimestamp - clientTime;
+		break;
+	  case 'initial_game_state':
+		// 초기 게임 상태 설정
+		this.states = {
+		  ball: data.ball,
+		  paddle: data.paddle,
+		  score: data.score || { player1: 0, player2: 0 },
+		};
+		this.updateGameObjects(); // 초기 상태로 게임 오브젝트 업데이트
+		break;
+	  case 'game_start':
+		return this.setGameStarted();
+	  case 'countdown_sequence':
+		if (this.serverTimeDiff === undefined) {
+		  // 시간 동기화가 아직 안 됐으면 잠시 대기 후 재시도
+		  setTimeout(() => this.handleCountdownSequence(data), 100);
+		  return;
+		}
+		this.handleCountdownSequence(data);
+		break;
+	  case 'player_assigned':
+		this.websocket.send(
+		  JSON.stringify({
+			type: 'sync_time',
+			client_time: Date.now(), // timestamp 대신 client_time 사용
+		  }),
+		);
+		return this.setPlayerNumber(data);
+	  case 'opponent_update':
+		return this.updateOpponentPaddle(data);
+	  case 'game_state_update':
+		return this.updateGameState(data);
+	  case 'countdown':
+		return this.handleCountdown(data);
+	  case 'game_end':
+		return this.handleGameEnd(data);
+	}
   }
 
   handleCountdownSequence(data) {
@@ -676,6 +709,17 @@ createGameObjects() {
 		  
 			dispose() {
 			  // Update event listener cleanup
+			if (this.highlightSegment) {
+				this.highlightSegment.geometry.dispose();
+				this.highlightSegment.material.dispose();
+				this.scene.remove(this.highlightSegment);
+			}
+			
+			if (this.fadeSegment) {
+				this.fadeSegment.geometry.dispose();
+				this.fadeSegment.material.dispose();
+				this.scene.remove(this.fadeSegment);
+			}
 			  document.removeEventListener('keydown', this.onKeyDown);
 			  document.removeEventListener('keyup', this.onKeyUp);
 			  window.removeEventListener('resize', this.onWindowResize);
@@ -806,21 +850,31 @@ createGameObjects() {
 				}
 				const scale = INITIAL_BALL_SCALE + (MAX_BALL_SCALE - INITIAL_BALL_SCALE) * progress;
 				this.objects.ball.scale.set(scale, scale, scale);
+
+				
 				
 				// 세그먼트 하이라이트 업데이트
+				// 하이라이트 세그먼트 위치 업데이트
 				const ballZ = Math.abs(
 					this.playerNumber === 'player2' 
 						? -(-TUNNEL_LENGTH - this.states.ball.position.z)
 						: this.states.ball.position.z
 				);
-				const currentSegment = Math.floor(ballZ / SEGMENT_SPACING);
-				this.tunnelSegments.forEach((segment, index) => {
-					if (index === currentSegment) {
-						segment.material.color.setHex(0xffffff);
-					} else { 
-						segment.material.color.setHex(0x00ff00);
-					}
-				});
+
+				const targetZ = -ballZ;
+				const currentZ = this.highlightSegment.position.z;
+				const newZ = currentZ + (targetZ - currentZ) * 0.1;
+
+				this.highlightSegment.position.setZ(newZ);
+				this.fadeSegment.position.setZ(newZ + 0.5);
+
+				// 세그먼트 통과 시 발광 효과
+				const proximityToSegment = Math.abs(ballZ % SEGMENT_SPACING);
+				const normalizedProximity = 1 - (proximityToSegment / SEGMENT_SPACING);
+
+				this.highlightSegment.material.opacity = 0.8 + (normalizedProximity * 0.2);
+				this.fadeSegment.material.opacity = 0.2 + (normalizedProximity * 0.1);
+				
 			 
 				// 패들 위치 계산
 				const player1Z = PADDLE_Z;
