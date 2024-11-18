@@ -53,7 +53,7 @@ const Game = () => {
   }, []);
 
   return (
-    <div>
+    <div className='bg-black'>
       <div className='position-absolute d-flex justify-content-between w-100 mt-4 px-4 game-info'>
         <Profile {...game.player1} />
         <h1 className='text-white'>{`${score.player1} : ${score.player2}`}</h1>
