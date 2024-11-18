@@ -85,8 +85,6 @@ export class PongGame {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 1000);
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(WIDTH, HEIGHT);
     document.getElementById(elementId).appendChild(this.renderer.domElement);
 
     this.createGameObjects();
