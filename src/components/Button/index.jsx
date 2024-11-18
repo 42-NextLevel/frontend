@@ -1,20 +1,22 @@
 const Button = ({
   children,
   onClick,
+  color = 'primary',
   disabled = false,
   outline = false,
   noPadding = false,
 }) => {
-  const styles = {
-    btn: true,
-    'btn-lg': true,
-    'btn-primary': !outline,
-    'btn-outline-primary': outline,
-    'px-5': !noPadding,
-  };
-  const className = Object.keys(styles)
-    .filter((key) => styles[key])
-    .join(' ');
+  const styles = ['btn', 'btn-lg'];
+  if (!noPadding) {
+    styles.push('px-5');
+  }
+  const buttonStyle = ['btn-'];
+  if (outline) {
+    buttonStyle.push('outline-');
+  }
+  buttonStyle.push(color);
+  styles.push(buttonStyle.join(''));
+  const className = styles.join(' ');
 
   return (
     <button
