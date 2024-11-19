@@ -10,22 +10,50 @@ const MatchType = {
 Object.freeze(MatchType);
 
 export const HistoryTile = ({ history, id }) => {
-  const [contractHistory, setContractHistory] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [content, setContent] = useState(null);
 
   const handleClick = async (gameId) => {
-    if (contractHistory) {
+    if (content) {
       return;
     }
 
-    setIsLoading(true);
-
     try {
       const res = await getContractHistory(gameId);
-      setContractHistory(res);
+      switch (res.status) {
+        case 'OK':
+          setContent(
+            <div
+              className='w-100 d-flex text-center align-items-center'
+              style='padding-right:20px'
+            >
+              <div className='w-25'>{MatchType[res.matchType]}</div>
+              <div className='w-25'>{res.startTime}</div>
+              <div className='w-25'>{`${res.nick1} vs ${res.nick2}`}</div>
+              <div className='w-25'>{`${res.score1} : ${res.score2}`}</div>
+            </div>,
+          );
+          break;
+        case 'pending':
+          setContent(<div className='text-center'>{res.message}</div>);
+          break;
+        case 'invalid':
+          setContent(
+            <div className='text-center'>
+              There is an error in the transaction record.
+            </div>,
+          );
+          break;
+        case 'error':
+          setContent(<div className='text-center'>{res.message}</div>);
+          break;
+        case 'not_found':
+          setContent(<div className='text-center'>{res.message}</div>);
+          break;
+      }
     } catch (e) {
-    } finally {
-      setIsLoading(false);
+      setContent(
+        <div className='text-center'>Error occurred: {e.message}</div>,
+      );
     }
   };
 
@@ -61,26 +89,8 @@ export const HistoryTile = ({ history, id }) => {
           className='accordion-collapse collapse'
           data-bs-parent='#HistoryList'
         >
-          <div className='accordion-body'>
-            {contractHistory ? (
-              <div
-                className='w-100 d-flex text-center align-items-center'
-                style='padding-right:20px'
-              >
-                <div className='w-25'>
-                  {MatchType[contractHistory.matchType]}
-                </div>
-                <div className='w-25'>{contractHistory.startTime}</div>
-                <div className='w-25'>
-                  {`${contractHistory.nick1} vs ${contractHistory.nick2}`}
-                </div>
-                <div className='w-25'>
-                  {`${contractHistory.score1} : ${contractHistory.score2}`}
-                </div>
-              </div>
-            ) : (
-              'loading'
-            )}
+          <div className='accordion-body bg-body-secondary'>
+            {!content ? <div className='text-center'>loading</div> : content}
           </div>
         </div>
       </div>
