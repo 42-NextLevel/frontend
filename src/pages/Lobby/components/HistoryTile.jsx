@@ -1,3 +1,6 @@
+import { getContractHistory } from '../../../services/contract';
+import { useState } from '@/library/hooks.js';
+
 const MatchType = {
   0: '1대1',
   1: '4강전',
@@ -7,6 +10,25 @@ const MatchType = {
 Object.freeze(MatchType);
 
 export const HistoryTile = ({ history, id }) => {
+  const [contractHistory, setContractHistory] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = async (gameId) => {
+    if (contractHistory) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const res = await getContractHistory(gameId);
+      setContractHistory(res);
+    } catch (e) {
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <div className='accordion-item'>
@@ -18,12 +40,15 @@ export const HistoryTile = ({ history, id }) => {
             data-bs-target={`#${id}`}
             aria-expanded='false'
             aria-controls={id}
+            onClick={() => {
+              handleClick(history.game_id);
+            }}
           >
             <div className='w-100 d-flex text-center align-items-center'>
               <div className='w-25'>{MatchType[history.matchType]}</div>
               <div className='w-25'>{history.date}</div>
               <div className='w-25'>
-                {history.leftNick}vs{history.rightNick}
+                {history.leftNick} vs {history.rightNick}
               </div>
               <div className='w-25'>
                 {history.leftScore} : {history.rightScore}
@@ -36,7 +61,27 @@ export const HistoryTile = ({ history, id }) => {
           className='accordion-collapse collapse'
           data-bs-parent='#HistoryList'
         >
-          <div className='accordion-body'>blockchain history</div>
+          <div className='accordion-body'>
+            {contractHistory ? (
+              <div
+                className='w-100 d-flex text-center align-items-center'
+                style='padding-right:20px'
+              >
+                <div className='w-25'>
+                  {MatchType[contractHistory.matchType]}
+                </div>
+                <div className='w-25'>{contractHistory.startTime}</div>
+                <div className='w-25'>
+                  {`${contractHistory.nick1} vs ${contractHistory.nick2}`}
+                </div>
+                <div className='w-25'>
+                  {`${contractHistory.score1} : ${contractHistory.score2}`}
+                </div>
+              </div>
+            ) : (
+              'loading'
+            )}
+          </div>
         </div>
       </div>
     </>
