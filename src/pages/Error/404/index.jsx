@@ -1,5 +1,5 @@
 import Error from '../layout.jsx';
-import { ERROR_PAGE_MESSAGE } from '../constants.js';
+import { ERROR_PAGE_MESSAGE } from '@/constants/messages.js';
 
 const PageNotFound = () => {
   return <Error {...ERROR_PAGE_MESSAGE[404]} />;

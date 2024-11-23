@@ -12,3 +12,8 @@ export const ERROR_PAGE_MESSAGE = {
     buttonLabel: 'Go Home',
   },
 };
+
+export const LOBBY_ERROR_MESSAGE = {
+  'Nickname already exists': '다른 닉네임을 사용해주세요.',
+  'Room is full': '방이 꽉 찼습니다. 다른 방을 이용해주세요.',
+};

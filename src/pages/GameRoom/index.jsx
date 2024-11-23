@@ -7,7 +7,7 @@ import Badge from '@/components/Badge';
 
 import { gameStart } from '@/services/room.js';
 
-import { GAME_RULES, TYPES } from './constants.js';
+import { GAME_RULES, TYPES } from '@/constants/game.js';
 
 const GameRoom = () => {
   const { roomId } = useParams();
