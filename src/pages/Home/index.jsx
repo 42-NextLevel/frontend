@@ -3,7 +3,7 @@ import Button from '@/components/Button';
 import { OAUTH_URI } from '@/constants/uri.js';
 import { getNewToken } from '@/services/auth.js';
 import { useEffect } from '@/library/hooks.js';
-import { Matrix } from './animation.js';
+import { Matrix } from '@/animations/Matrix.js';
 
 const Home = () => {
   const navigate = useNavigate();
