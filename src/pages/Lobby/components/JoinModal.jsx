@@ -3,7 +3,6 @@ import Input from '@/components/Input';
 import { postJoinRoom } from '@/services/game';
 import { useState } from '@/library/hooks.js';
 import { useNavigate } from '@/library/router/hooks.js';
-import { LOBBY_ERROR_MESSAGE } from '@/constants/messages.js';
 
 const JoinModal = ({ id, room }) => {
   const [nickname, setNickname] = useState('');
@@ -19,7 +18,7 @@ const JoinModal = ({ id, room }) => {
       })
       .catch((e) => {
         const { error } = e.response.data;
-        alert(LOBBY_ERROR_MESSAGE[error]);
+        alert(error);
       });
   };
 
