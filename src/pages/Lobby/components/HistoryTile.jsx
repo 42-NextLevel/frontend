@@ -6,6 +6,7 @@ const MatchType = {
   1: '4강전',
   2: '4강전',
   3: '결승전',
+  4: '3위 결정전',
 };
 Object.freeze(MatchType);
 
