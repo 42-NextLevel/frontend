@@ -1,4 +1,4 @@
-import Error from '../layout.jsx';
+import Error from '../layout';
 import { ERROR_PAGE_MESSAGE } from '@/constants/messages.js';
 
 const Unauthorized = () => {
