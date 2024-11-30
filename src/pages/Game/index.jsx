@@ -1,4 +1,4 @@
-import { PongGame } from './PongGame.js';
+import { PongGame } from '@/animations/PongGame.js';
 import { useEffect, useState } from '@/library/hooks.js';
 import {
   useLoaderData,

@@ -1,12 +1,19 @@
-export const jsx = (type, props, ...children) => {
+export const h = (type, props, ...children) =>
+  jsx(type, { ...props, children });
+
+export const jsx = (type, props) => {
   if (typeof type === 'function') {
-    return type({ ...props, children });
+    return type(props);
   }
-  return {
-    type,
-    props,
-    children: children.flat(2).filter((child) => child),
-  };
+
+  const children =
+    props.children === undefined
+      ? []
+      : Array.isArray(props.children)
+        ? props.children.flat(2).filter((child) => child)
+        : [props.children];
+
+  return { type, props, children };
 };
 
 export const jsxs = jsx;

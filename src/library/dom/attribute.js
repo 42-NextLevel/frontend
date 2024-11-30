@@ -33,6 +33,9 @@ const isEventAttribute = (attribute, value) =>
   attribute.startsWith('on') && typeof value === 'function';
 
 export const setAttribute = (element, attr, value) => {
+  if (attr === 'children') {
+    return;
+  }
   if (isEventAttribute(attr, value)) {
     const event = attr.slice(2).toLowerCase();
     return element.addEventListener(event, value);
