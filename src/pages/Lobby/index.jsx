@@ -4,16 +4,17 @@ import AddRoundIcon from '/images/add-round.svg';
 import RefreshIcon from '/images/refresh.svg';
 import { useState } from '@/library/hooks.js';
 import ModalTrigger from '@/components/ModalTrigger';
-import JoinModal from './components/JoinModal';
-import CreateModal from './components/CreateModal';
+import JoinModal from '@/pages/lobby/components/JoinModal';
+import CreateModal from '@/pages/lobby/components/CreateModal';
 import { useLoaderData } from '@/library/router/hooks.js';
-import { getRoomList } from '@/services/game';
 import { logout } from '@/services/user';
+import { getRoomList } from '@/services/game';
+import { HistoryList } from '@/pages/lobby/components/HistoryList';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
 
 const Lobby = () => {
-  const { roomList, userProfile } = useLoaderData();
+  const { roomList, userProfile, gameHistory } = useLoaderData();
   const [slicedRoomList, setSlicedRoomList] = useState(roomList);
   const [page, setPage] = useState(1);
   const [isThrottle, setIsThrottle] = useState(false);
@@ -132,7 +133,7 @@ const Lobby = () => {
         </div>
         <div>
           <h2>경기 기록</h2>
-          <div>경기 기록 창</div>
+          <HistoryList historyList={gameHistory.history} />
         </div>
       </div>
       <div>
