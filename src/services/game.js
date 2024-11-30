@@ -19,7 +19,12 @@ export const getRoomList = async () => {
 };
 
 export const postMakeRoom = async (data) => {
-  return service.post('/game/new', data).then((res) => res.data);
+  return service
+    .post('/game/new', data)
+    .then((res) => res.data)
+    .catch((e) => {
+      alert(e.response.data.error);
+    });
 };
 
 export const postJoinRoom = async (data) => {
