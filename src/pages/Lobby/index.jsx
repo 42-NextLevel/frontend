@@ -1,15 +1,15 @@
 import Profile from '@/components/Profile/index';
-import RoomCard from './components/RoomCard';
+import RoomCard from '@/pages/Lobby/components/RoomCard';
 import AddRoundIcon from '/images/add-round.svg';
 import RefreshIcon from '/images/refresh.svg';
 import { useState } from '@/library/hooks.js';
 import ModalTrigger from '@/components/ModalTrigger';
-import JoinModal from '@/pages/lobby/components/JoinModal';
-import CreateModal from '@/pages/lobby/components/CreateModal';
+import JoinModal from '@/pages/Lobby/components/JoinModal';
+import CreateModal from '@/pages/Lobby/components/CreateModal';
 import { useLoaderData } from '@/library/router/hooks.js';
 import { logout } from '@/services/user';
 import { getRoomList } from '@/services/game';
-import { HistoryList } from '@/pages/lobby/components/HistoryList';
+import { HistoryList } from '@/pages/Lobby/components/HistoryList';
 
 // TODO: 모달 끄면 input 초기화 => 모달 수정
 
