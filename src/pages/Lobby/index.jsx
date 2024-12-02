@@ -56,8 +56,8 @@ const Lobby = () => {
 
   return (
     <>
-      <div className='lobby'>
-        <div>
+      <main className='lobby'>
+        <section>
           <div className='d-flex justify-content-between col-9 mb-4 pe-3'>
             <h2 className='mb-0'>방 리스트</h2>
             <div>
@@ -115,12 +115,12 @@ const Lobby = () => {
               </button>
             </div>
           </div>
-        </div>
-        <div>
+        </section>
+        <section>
           <h2>경기 기록</h2>
           <HistoryList historyList={gameHistory.history} />
-        </div>
-      </div>
+        </section>
+      </main>
       <div>
         {/* 게임 생성 모달 */}
         <CreateModal id='create' />
