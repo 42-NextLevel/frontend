@@ -6,3 +6,9 @@
   border: solid 3px $color;
   border-radius: $border-radius;
 }
+
+@mixin wrapper {
+  width: 1280px;
+  margin: 0 auto;
+  min-height: 100vh;
+}

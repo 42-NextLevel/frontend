@@ -56,10 +56,7 @@ const Lobby = () => {
 
   return (
     <>
-      <div
-        className='position-absolute top-50 start-50 translate-middle'
-        style='width: 1024px; height: 100%; padding-top: 100px;'
-      >
+      <div className='lobby'>
         <div>
           <div className='d-flex justify-content-between col-9 mb-4 pe-3'>
             <h2 className='mb-0'>방 리스트</h2>
