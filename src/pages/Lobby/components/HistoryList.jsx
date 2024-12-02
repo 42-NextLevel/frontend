@@ -1,6 +1,12 @@
 import { HistoryTile } from './HistoryTile';
 
 export const HistoryList = ({ historyList }) => {
+  if (historyList.length === 0) {
+    return (
+      <h5 className='text-center text-secondary mt-6'>경기 기록이 없습니다</h5>
+    );
+  }
+
   return (
     <>
       <div
@@ -15,7 +21,7 @@ export const HistoryList = ({ historyList }) => {
         </div>
       </div>
       <div className='accordion' id='HistoryList'>
-        {historyList?.map((history, key) => (
+        {historyList.map((history, key) => (
           <HistoryTile history={history} id={'history' + key} />
         ))}
       </div>
