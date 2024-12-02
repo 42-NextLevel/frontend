@@ -1,5 +1,5 @@
 import Profile from '@/components/Profile/index';
-import RoomCard from '@/pages/Lobby/components/RoomCard';
+import RoomList from '@/pages/Lobby/components/RoomList';
 import AddRoundIcon from '/images/add-round.svg';
 import RefreshIcon from '/images/refresh.svg';
 import { useState } from '@/library/hooks.js';
@@ -85,23 +85,11 @@ const Lobby = () => {
           <div className='row mx-0 gx-0'>
             <div className='col-9' onWheel={handleWheel}>
               <div className='row mx-0' style='height: 294px'>
-                {/* 방 리스트 */}
-                {slicedRoomList.length === 0 && (
-                  <h5 className='col-12 text-center align-self-center text-secondary'>
-                    방이 없습니다
-                  </h5>
-                )}
-                {slicedRoomList[page - 1]?.map((roomInfo, index) => (
-                  <div
-                    key={roomInfo.id}
-                    className={`col-6 px-0 pe-3 ${index < 2 ? 'pb-3' : ''}`}
-                    onClick={() => handleJoinRoom(roomInfo)}
-                  >
-                    <ModalTrigger id='join'>
-                      <RoomCard {...roomInfo} />
-                    </ModalTrigger>
-                  </div>
-                ))}
+                <RoomList
+                  slicedRoomList={slicedRoomList}
+                  page={page}
+                  onJoinRoom={handleJoinRoom}
+                />
               </div>
               <div className='d-flex justify-content-center pe-3 pt-2'>
                 {/* 페이지네이션 */}
