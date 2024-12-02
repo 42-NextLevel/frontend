@@ -35,6 +35,10 @@ const GameRoom = () => {
           return setRoom(data);
         case TYPES.gameStart:
           return navigate(`/game/${roomId}`, { replace: true });
+        case TYPES.error: {
+          alert(data);
+          return navigate('/lobby', { replace: true });
+        }
       }
     };
 
