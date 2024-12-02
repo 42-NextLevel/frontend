@@ -118,7 +118,7 @@ const Lobby = () => {
         </section>
         <section>
           <h2>경기 기록</h2>
-          <HistoryList historyList={gameHistory.history} />
+          <HistoryList historyList={gameHistory} />
         </section>
       </main>
       <div>

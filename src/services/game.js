@@ -48,5 +48,8 @@ export const getPlayersInfo = (roomId) => {
 };
 
 export const getGameHistory = () => {
-  return service.get('/game/history').then((res) => res.data);
+  return service.get('/game/history').then((res) => {
+    const { history } = res.data;
+    return history.reverse();
+  });
 };
