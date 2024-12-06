@@ -512,6 +512,7 @@ export class PongGame {
           paddle: data.paddle,
           score: data.score || { player1: 0, player2: 0 },
         };
+        this.updateScore(this.states.score);
         this.updateGameObjects(); // 초기 상태로 게임 오브젝트 업데이트
         break;
       case 'game_start':
