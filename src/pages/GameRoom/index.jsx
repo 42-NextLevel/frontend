@@ -4,8 +4,9 @@ import { useEffect, useState } from '@/library/hooks';
 import Button from '@/components/Button';
 import Profile from '@/components/Profile';
 import Badge from '@/components/Badge';
+import Spinner from '@/components/Spinner';
 
-import { gameStart } from '@/services/room.js';
+import { connectRoom, gameStart } from '@/services/room.js';
 
 import { GAME_RULES, TYPES } from '@/constants/game.js';
 
@@ -21,13 +22,17 @@ const GameRoom = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const websocket = new WebSocket(
-      `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intraId=${intra_id}`,
-    );
-    websocket.onerror = () => {
+    if (!intra_id || !nickname) {
       alert('잘못된 접근입니다.');
+      return navigate('/lobby', { replace: true });
+    }
+
+    const connectURI = `${import.meta.env.VITE_ROOM_WEBSOCKET_URI}/room/${roomId}?nickname=${nickname}&intraId=${intra_id}`;
+    const onerror = () => {
+      alert('방이 존재하지 않습니다.');
       navigate('/lobby', { replace: true });
     };
+    const websocket = connectRoom(connectURI, onerror);
     websocket.onmessage = (event) => {
       const { type, data } = JSON.parse(event.data);
       switch (type) {
@@ -57,8 +62,16 @@ const GameRoom = () => {
     });
   };
 
-  if (!room.players.length) {
+  if (!intra_id || !nickname) {
     return null;
+  }
+
+  if (!room.players.length) {
+    return (
+      <div className='wrap'>
+        <Spinner message='연결중..' />
+      </div>
+    );
   }
 
   return (
