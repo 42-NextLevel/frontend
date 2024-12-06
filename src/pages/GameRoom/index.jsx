@@ -92,8 +92,8 @@ const GameRoom = () => {
       <Button onClick={handleClick} disabled={room.host !== nickname}>
         게임 시작
       </Button>
-      <h5 className='mt-5'>🏓 게임 규칙</h5>
-      <ul>
+      <h4 className='mt-5'>🏓 게임 규칙</h4>
+      <ul className='d-flex flex-column align-items-center'>
         {GAME_RULES.map((rule) => (
           <li>{rule}</li>
         ))}
