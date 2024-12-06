@@ -5,6 +5,7 @@ import { post42Code } from '@/services/auth.js';
 import PageNotFound from '@/pages/Error/404';
 import AuthCode from '@/pages/AuthCode';
 import AuthMail from '@/pages/AuthMail';
+import Spinner from '@/components/Spinner';
 
 const Auth = () => {
   const searchParams = useSearchParams();
@@ -47,10 +48,7 @@ const Auth = () => {
 
   return (
     <div className='wrap'>
-      <div className='spinner-border' role='status'>
-        <span className='visually-hidden'>Loading...</span>
-      </div>
-      <div className='mt-2'>로그인중..</div>
+      <Spinner message='로그인중..' />
     </div>
   );
 };
